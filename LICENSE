@@ -1,0 +1,61 @@
+MIT License
+
+Copyright (c) 2024 Behavioral Risk Index (BRI) Dashboard
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## Additional Terms for Research Use
+
+### Academic Use
+This software is provided for academic and research purposes. When using this software in academic research, please cite the original research paper and provide appropriate attribution.
+
+### Commercial Use
+Commercial use of this software is permitted under the MIT License. However, we encourage commercial users to:
+- Contribute back improvements and enhancements
+- Share insights and feedback with the research community
+- Consider supporting the project through contributions
+
+### Data Sources
+This software integrates data from various sources including:
+- GDELT (Global Database of Events, Language, and Tone)
+- Reddit API
+- Yahoo Finance
+- Other publicly available financial data sources
+
+Users are responsible for complying with the terms of service of these data providers.
+
+### Disclaimer
+This software is for research and educational purposes. It should not be used as the sole basis for investment decisions. The authors and contributors are not responsible for any financial losses or damages resulting from the use of this software.
+
+### Citation
+If you use this software in your research, please cite:
+
+```
+Behavioral Risk Index (BRI): A Comprehensive Framework for Market Sentiment Analysis and Risk Assessment
+[Your Name], 2024
+Available at: https://github.com/mrayanasim09/Behavioral_Risk_Index
+Live Demo: https://web-production-ad69da.up.railway.app/
+```
+
+### Contact
+For questions about licensing or commercial use, please contact:
+- Email: [your.email@example.com]
+- GitHub: [@mrayanasim09](https://github.com/mrayanasim09)
