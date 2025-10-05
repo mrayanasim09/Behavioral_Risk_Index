@@ -349,21 +349,37 @@ def api_correlation_chart():
         )
     ))
     
-    # Add regression line
-    z = np.polyfit(merged['BRI'], merged['Close_^VIX'], 1)
-    p = np.poly1d(z)
-    x_range = np.linspace(merged['BRI'].min(), merged['BRI'].max(), 100)
-    y_pred = p(x_range)
+    # Add regression line with error handling
+    try:
+        # Check for valid data before fitting
+        if len(merged) > 1 and not merged['BRI'].isna().all() and not merged['Close_^VIX'].isna().all():
+            # Remove NaN values for fitting
+            clean_data = merged.dropna(subset=['BRI', 'Close_^VIX'])
+            if len(clean_data) > 1:
+                z = np.polyfit(clean_data['BRI'], clean_data['Close_^VIX'], 1)
+                p = np.poly1d(z)
+                x_range = np.linspace(clean_data['BRI'].min(), clean_data['BRI'].max(), 100)
+                y_pred = p(x_range)
+                
+                fig.add_trace(go.Scatter(
+                    x=x_range.tolist(),
+                    y=y_pred.tolist(),
+                    mode='lines',
+                    name='Regression Line',
+                    line=dict(color='#2D3748', width=3)  # VIX Overlay - Professional Dark Gray
+                ))
+    except (np.linalg.LinAlgError, ValueError) as e:
+        logger.warning(f"Could not fit regression line: {e}")
+        # Continue without regression line
     
-    fig.add_trace(go.Scatter(
-        x=x_range.tolist(),
-        y=y_pred.tolist(),
-        mode='lines',
-        name='Regression Line',
-        line=dict(color='#2D3748', width=3)  # VIX Overlay - Professional Dark Gray
-    ))
-    
-    correlation = merged['BRI'].corr(merged['Close_^VIX'])
+    # Calculate correlation with error handling
+    try:
+        correlation = merged['BRI'].corr(merged['Close_^VIX'])
+        if pd.isna(correlation):
+            correlation = 0.0
+    except Exception as e:
+        logger.warning(f"Error calculating correlation: {e}")
+        correlation = 0.0
     
     fig.update_layout(
         title=dict(
@@ -388,11 +404,47 @@ def api_feature_chart():
     if analyzer.bri_data is None:
         return jsonify({'error': 'No data available'})
     
-    feature_cols = ['sent_vol_score', 'news_tone_score', 'herding_score', 
-                   'polarity_skew_score', 'event_density_score']
+    # Check which feature columns actually exist in the data
+    available_cols = analyzer.bri_data.columns.tolist()
     
-    feature_names = [col.replace('_score', '').replace('_', ' ').title() for col in feature_cols]
-    feature_values = [analyzer.bri_data[col].mean() for col in feature_cols]
+    # Define possible feature columns and their fallbacks
+    feature_mapping = {
+        'sent_vol_score': ['sent_vol_score', 'sentiment_volatility', 'sentiment_vol'],
+        'news_tone_score': ['news_tone_score', 'news_tone', 'tone_score'],
+        'herding_score': ['herding_score', 'herding', 'mentions_growth'],
+        'polarity_skew_score': ['polarity_skew_score', 'polarity_skew', 'skew_score'],
+        'event_density_score': ['event_density_score', 'event_density', 'events']
+    }
+    
+    feature_cols = []
+    feature_names = []
+    
+    for key, possible_cols in feature_mapping.items():
+        found_col = None
+        for col in possible_cols:
+            if col in available_cols:
+                found_col = col
+                break
+        
+        if found_col:
+            feature_cols.append(found_col)
+            feature_names.append(key.replace('_score', '').replace('_', ' ').title())
+        else:
+            # Use a default value if column doesn't exist
+            feature_cols.append('BRI')  # Fallback to BRI
+            feature_names.append(key.replace('_score', '').replace('_', ' ').title())
+    
+    # Calculate feature values with error handling
+    feature_values = []
+    for col in feature_cols:
+        try:
+            if col in analyzer.bri_data.columns:
+                feature_values.append(analyzer.bri_data[col].mean())
+            else:
+                feature_values.append(0)  # Default value
+        except Exception as e:
+            logger.warning(f"Error calculating mean for {col}: {e}")
+            feature_values.append(0)
     
     fig = go.Figure(data=[
         go.Bar(
