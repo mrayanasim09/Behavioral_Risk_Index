@@ -218,7 +218,7 @@ def api_bri_chart():
         y=clean_for_json(analyzer.bri_data['BRI']).tolist(),
         mode='lines',
         name='BRI',
-        line=dict(color='blue', width=2)
+        line=dict(color='#0052CC', width=2)
     ))
     
     # Add 7-day moving average
@@ -232,26 +232,34 @@ def api_bri_chart():
         y=clean_for_json(smooth_data).tolist(),
         mode='lines',
         name='7-Day MA',
-        line=dict(color='darkblue', width=3)
+        line=dict(color='#00B8D9', width=3)
     ))
     
     # Add risk thresholds
     mean_bri = analyzer.bri_data['BRI'].mean()
     std_bri = analyzer.bri_data['BRI'].std()
     
-    fig.add_hline(y=mean_bri, line_dash="dash", line_color="gray", 
+    fig.add_hline(y=mean_bri, line_dash="dash", line_color="#6B778C", 
                   annotation_text=f"Mean: {mean_bri:.1f}")
-    fig.add_hline(y=mean_bri + std_bri, line_dash="dash", line_color="orange", 
+    fig.add_hline(y=mean_bri + std_bri, line_dash="dash", line_color="#FF5630", 
                   annotation_text=f"+1σ: {mean_bri + std_bri:.1f}")
-    fig.add_hline(y=mean_bri - std_bri, line_dash="dash", line_color="orange", 
+    fig.add_hline(y=mean_bri - std_bri, line_dash="dash", line_color="#FF5630", 
                   annotation_text=f"-1σ: {mean_bri - std_bri:.1f}")
     
     fig.update_layout(
-        title='Behavioral Risk Index (BRI) Over Time',
+        title=dict(
+            text='Behavioral Risk Index (BRI) Over Time',
+            font=dict(color='#172B4D', size=16)
+        ),
         xaxis_title='Date',
         yaxis_title='BRI (0-100)',
         hovermode='x unified',
-        height=500
+        height=500,
+        plot_bgcolor='#FFFFFF',
+        paper_bgcolor='#FFFFFF',
+        font=dict(color='#172B4D'),
+        xaxis=dict(gridcolor='#F4F5F7'),
+        yaxis=dict(gridcolor='#F4F5F7')
     )
     
     return jsonify(fig.to_dict())
@@ -282,9 +290,9 @@ def api_correlation_chart():
         marker=dict(
             size=8,
             color=list(range(len(merged))),
-            colorscale='Viridis',
+            colorscale=[[0, '#0052CC'], [0.5, '#00B8D9'], [1, '#FF5630']],
             showscale=True,
-            colorbar=dict(title="Time Index")
+            colorbar=dict(title="Time Index", titlefont=dict(color='#172B4D'))
         )
     ))
     
@@ -299,16 +307,24 @@ def api_correlation_chart():
         y=y_pred.tolist(),
         mode='lines',
         name='Regression Line',
-        line=dict(color='red', width=3)
+        line=dict(color='#FF5630', width=3)
     ))
     
     correlation = merged['BRI'].corr(merged['Close_^VIX'])
     
     fig.update_layout(
-        title=f'BRI vs VIX Correlation (r = {correlation:.3f})',
+        title=dict(
+            text=f'BRI vs VIX Correlation (r = {correlation:.3f})',
+            font=dict(color='#172B4D', size=16)
+        ),
         xaxis_title='Behavioral Risk Index (BRI)',
         yaxis_title='VIX (Volatility Index)',
-        height=500
+        height=500,
+        plot_bgcolor='#FFFFFF',
+        paper_bgcolor='#FFFFFF',
+        font=dict(color='#172B4D'),
+        xaxis=dict(gridcolor='#F4F5F7'),
+        yaxis=dict(gridcolor='#F4F5F7')
     )
     
     return jsonify(fig.to_dict())
@@ -329,15 +345,23 @@ def api_feature_chart():
         go.Bar(
             x=feature_names,
             y=feature_values,
-            marker_color=['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7']
+            marker_color=['#0052CC', '#00B8D9', '#FF5630', '#6B778C', '#172B4D']
         )
     ])
     
     fig.update_layout(
-        title='Feature Importance (Average Scores)',
+        title=dict(
+            text='Feature Importance (Average Scores)',
+            font=dict(color='#172B4D', size=16)
+        ),
         xaxis_title='Features',
         yaxis_title='Average Score',
-        height=400
+        height=400,
+        plot_bgcolor='#FFFFFF',
+        paper_bgcolor='#FFFFFF',
+        font=dict(color='#172B4D'),
+        xaxis=dict(gridcolor='#F4F5F7'),
+        yaxis=dict(gridcolor='#F4F5F7')
     )
     
     return jsonify(fig.to_dict())
@@ -355,20 +379,28 @@ def api_distribution_chart():
         x=clean_for_json(analyzer.bri_data['BRI']).tolist(),
         nbinsx=30,
         name='BRI Distribution',
-        marker_color='green',
+        marker_color='#00B8D9',
         opacity=0.7
     ))
     
     # Add mean line
     mean_bri = analyzer.bri_data['BRI'].mean()
-    fig.add_vline(x=mean_bri, line_dash="dash", line_color="red", 
+    fig.add_vline(x=mean_bri, line_dash="dash", line_color="#FF5630", 
                   annotation_text=f"Mean: {mean_bri:.1f}")
     
     fig.update_layout(
-        title='BRI Distribution',
+        title=dict(
+            text='BRI Distribution',
+            font=dict(color='#172B4D', size=16)
+        ),
         xaxis_title='BRI Value',
         yaxis_title='Frequency',
-        height=400
+        height=400,
+        plot_bgcolor='#FFFFFF',
+        paper_bgcolor='#FFFFFF',
+        font=dict(color='#172B4D'),
+        xaxis=dict(gridcolor='#F4F5F7'),
+        yaxis=dict(gridcolor='#F4F5F7')
     )
     
     return jsonify(fig.to_dict())
