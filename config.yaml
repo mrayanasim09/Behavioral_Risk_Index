@@ -24,12 +24,12 @@ data_sources:
   # Reddit Configuration
   reddit:
     enabled: true
-    client_id: "KiGT8yL2ko-ZaWBYbQrwmw"
-    client_secret: "ezQtiCbSJhozM55eq8IC8Ee6qOJglg"
-    user_agent: "BRI-DataCollector/1.0 by mrayanasim09"
-    username: "mrayanasim09"  # Optional
-    password: "your_password_here"  # Optional
-    subreddits:
+    client_id: "${REDDIT_CLIENT_ID}"
+    client_secret: "${REDDIT_CLIENT_SECRET}"
+    user_agent: "${REDDIT_USER_AGENT}"
+    username: "${REDDIT_USERNAME}"  # Optional
+    password: "${REDDIT_PASSWORD}"  # Optional
+    subreddits: &finance_subreddits
       - "investing"
       - "stocks"
       - "SecurityAnalysis"

@@ -34,8 +34,8 @@ class DataCollector:
         self.gdelt_api_key = os.getenv('GDELT_API_KEY')
         self.newsapi_key = os.getenv('NEWSAPI_KEY')
         self.twitter_bearer_token = os.getenv('TWITTER_BEARER_TOKEN')
-        self.reddit_client_id = os.getenv('REDDIT_CLIENT_ID') or "KiGT8yL2ko-ZaWBYbQrwmw"
-        self.reddit_client_secret = os.getenv('REDDIT_CLIENT_SECRET') or "ezQtiCbSJhozM55eq8IC8Ee6qOJglg"
+        self.reddit_client_id = os.getenv('REDDIT_CLIENT_ID')
+        self.reddit_client_secret = os.getenv('REDDIT_CLIENT_SECRET')
         self.reddit_user_agent = os.getenv('REDDIT_USER_AGENT', 'BRI-Research-Bot/1.0')
         
         # Initialize API clients
@@ -366,18 +366,8 @@ class DataCollector:
             return self._get_sample_reddit_data()
         
         if subreddits is None:
-            # Comprehensive list of finance-related subreddits for research-grade data
-            subreddits = [
-                'investing', 'wallstreetbets', 'stocks', 'SecurityAnalysis', 'ValueInvesting',
-                'dividends', 'options', 'pennystocks', 'StockMarket', 'investing_discussion',
-                'financialindependence', 'personalfinance', 'cryptocurrency', 'bitcoin',
-                'ethereum', 'cryptomarkets', 'cryptocurrencytrading', 'defi', 'altcoin',
-                'financialcareers', 'accounting', 'tax', 'realestateinvesting', 'landlord',
-                'fire', 'leanfire', 'fatfire', 'bogleheads', 'portfolios', 'wealthfront',
-                'robinhood', 'tdameritrade', 'fidelity', 'schwab', 'etrade', 'webull',
-                'trading', 'daytrading', 'swingtrading', 'algotrading', 'forex', 'futures',
-                'commodities', 'bonds', 'fixedincome', 'reits', 'mutualfunds', 'etfs'
-            ]
+            # Read from config to avoid duplicated lists
+            subreddits = self.config.get('data_sources', {}).get('reddit', {}).get('subreddits', [])
         
         self.logger.info(f"Collecting comprehensive Reddit data from {start_date} to {end_date}")
         self.logger.info(f"Targeting {len(subreddits)} subreddits for substantial data collection")
