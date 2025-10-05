@@ -89,7 +89,7 @@ Strict no-leakage train/test (Train 2020–2025, Test 2017–2018):
 python train_test_from_raw.py
 ```
 
-Outputs (under `output/train_test_from_raw/`): `bri_train.csv`, `bri_test.csv`, `weights.json`, `scalers.json`, `validation_train.json`, `validation_test.json`, `summary.json`.
+Outputs (under `output/train_test_from_raw/`): `bri_train.csv`, `bri_test.csv`, charts, and `validation_report_2017_2018.pdf`.
 
 ### Exact reproducibility (optional)
 
@@ -106,26 +106,13 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-lock.txt
 ```
 
-## 📊 Real Data Analysis Results
+## 📊 Validation Artifacts (2017–2018)
 
-### Model Performance (Unseen Data)
-- **ROC AUC**: 0.762 (within professional range)
-- **Precision**: 0.850 (85% accuracy)
-- **Recall**: 0.691 (69% of crashes caught)
-- **F1 Score**: 0.763 (excellent balanced performance)
-- **Test Crashes**: 230 (sufficient for validation)
+- BRI Time Series (PNG): `/static/bri_test_series.png`
+- BRI vs VIX (PNG): `/static/bri_vs_vix_test.png`
+- Full Validation PDF: `/static/validation_report_2017_2018.pdf`
 
-### Sharpe Ratios (With Transaction Costs)
-- **Basic Sharpe**: 1.351 (without transaction costs)
-- **Realistic Sharpe**: 0.006 (with transaction costs)
-- **Transaction Cost**: 0.1% per trade
-- **Max Drawdown**: -0.758
-
-### Data Overview
-- **Total Data Points**: 1,257
-- **Training Set**: 785 points (5 years)
-- **Test Set**: 472 points (3 years unseen)
-- **No Look-ahead Bias**: Test data completely unseen
+Note: Early years have limited Reddit/news coverage; the pipeline applies a market+news fallback without data leakage.
 
 ## 📊 BRI vs VIX Comparison
 

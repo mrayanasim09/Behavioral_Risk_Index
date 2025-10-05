@@ -16,20 +16,9 @@
 
 ## Visuals
 
-Generate basic BRI test series plot:
-
-```bash
-python - << 'PY'
-import pandas as pd, json
-import matplotlib.pyplot as plt
-bri_test = pd.read_csv('output/train_test_from_raw/bri_test.csv', parse_dates=['date'])
-plt.figure(figsize=(10,4))
-plt.plot(bri_test['date'], bri_test['bri'])
-plt.title('BRI (Test 2017–2018)')
-plt.ylabel('BRI (0-100)'); plt.xlabel('Date'); plt.grid(True, alpha=0.3)
-plt.tight_layout(); plt.savefig('output/train_test_from_raw/bri_test_series.png', dpi=200)
-PY
-```
+- BRI Time Series (2017–2018): `/static/bri_test_series.png`
+- BRI vs VIX Overlay: `/static/bri_vs_vix_test.png`
+- Full PDF: `/static/validation_report_2017_2018.pdf`
 
 ## Recommendations
 
