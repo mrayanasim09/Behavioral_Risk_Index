@@ -118,14 +118,8 @@ pip install -r requirements.txt
 
 3. **Run the application**
 ```bash
-# Complete feature set
-python ultimate_complete_app.py
-
-# Research-grade version
-python research_grade_app.py
-
-# Optimized version
-python fast_ultimate_app.py
+# Main application (uses 5-year enhanced data)
+python app.py
 ```
 
 4. **Access the dashboard**
