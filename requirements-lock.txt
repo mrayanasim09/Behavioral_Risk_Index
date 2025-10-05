@@ -323,7 +323,7 @@ tk==0.1.0
 tld==0.13.1
 tokenizers==0.22.1
 toolz==1.0.0
-torch==2.7.1
+torch==2.8.0
 torchaudio==2.7.1
 torchvision==0.22.1
 tqdm==4.67.1
