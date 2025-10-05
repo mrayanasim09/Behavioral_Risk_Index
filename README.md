@@ -38,7 +38,7 @@ This project implements a sophisticated BRI system that:
 - **Precision**: 0.850 (85% accuracy)
 - **Recall**: 0.691 (69% of crashes caught)
 - **F1 Score**: 0.763 (excellent balanced performance)
-- **Realistic Sharpe**: 1.175 (with transaction costs)
+- **Realistic Sharpe**: 0.006 (with transaction costs)
 
 ## 🛠️ Installation
 
@@ -67,10 +67,10 @@ python app.py
 python app.py
 ```
 
-### Real Data Analysis
+### BRI vs VIX Comparison
 ```bash
-# Comprehensive real data analysis
-python real_data_analysis.py
+# Comprehensive comparison analysis
+python bri_vix_comparison.py
 ```
 
 ## 📊 Real Data Analysis Results
@@ -84,7 +84,7 @@ python real_data_analysis.py
 
 ### Sharpe Ratios (With Transaction Costs)
 - **Basic Sharpe**: 1.351 (without transaction costs)
-- **Realistic Sharpe**: 1.175 (with transaction costs)
+- **Realistic Sharpe**: 0.006 (with transaction costs)
 - **Transaction Cost**: 0.1% per trade
 - **Max Drawdown**: -0.758
 
@@ -93,6 +93,23 @@ python real_data_analysis.py
 - **Training Set**: 785 points (5 years)
 - **Test Set**: 472 points (3 years unseen)
 - **No Look-ahead Bias**: Test data completely unseen
+
+## 📊 BRI vs VIX Comparison
+
+### Key Differences
+- **BRI**: Composite behavioral index (0-100 scale)
+- **VIX**: Implied volatility (typically 10-80 range)
+- **BRI**: Includes sentiment and behavioral factors
+- **VIX**: Purely options-based volatility
+- **Correlation**: -0.194 (weak negative correlation)
+- **BRI Sharpe**: 0.826
+- **VIX Sharpe**: 0.653
+
+### Crisis Analysis
+- **Crisis Days**: 135 (VIX > 30)
+- **Crisis BRI Mean**: 20.00
+- **Crisis VIX Mean**: 38.32
+- **Crisis Correlation**: 0.002 (very weak)
 
 ## 🧪 Research Methodology
 
@@ -142,7 +159,7 @@ BRI = (
 - **F1 Score**: 0.763 (excellent balanced performance)
 
 ### Realistic Metrics
-- **Realistic Sharpe**: 1.175 (with transaction costs)
+- **Realistic Sharpe**: 0.006 (with transaction costs)
 - **Transaction Cost**: 0.1% per trade
 - **Max Drawdown**: -0.758
 - **Volatility**: 2.149
