@@ -1,0 +1,105 @@
+{
+  "executive_summary": {
+    "total_days": 1492,
+    "date_range": "2020-01-02 to 2024-12-30",
+    "avg_bri": 31.13539198150667,
+    "max_bri": 92.39107674362702,
+    "min_bri": 10.558788360215145,
+    "bri_volatility": 17.089027419334904
+  },
+  "scenario_analysis": {
+    "baseline": {
+      "scenario": "baseline",
+      "period_days": 1492,
+      "total_return": 0.021731312055561336,
+      "annual_return": 0.0036377234334514785,
+      "volatility": 0.02013449115251715,
+      "sharpe_ratio": 0.18067123752450542,
+      "max_drawdown": -0.02383047023841253,
+      "var_95": 0.0,
+      "var_99": -0.0004238241389393747,
+      "cvar_95": -7.142956238440085e-05,
+      "cvar_99": -0.0069639612995895306,
+      "win_rate": 0.015415549597855228,
+      "avg_win": 0.005548969143370957,
+      "avg_loss": -0.006172354537804991
+    },
+    "crisis": {
+      "scenario": "crisis",
+      "period_days": 52,
+      "total_return": -0.010701995701766776,
+      "annual_return": -0.05080691094394174,
+      "volatility": 0.02355935361533304,
+      "sharpe_ratio": -2.15654944416112,
+      "max_drawdown": -0.010701995701766776,
+      "var_95": 0.0,
+      "var_99": -0.00524397789386572,
+      "cvar_95": -0.00020580760964936107,
+      "cvar_99": -0.010701995701766776,
+      "win_rate": 0.0,
+      "avg_win": NaN,
+      "avg_loss": -0.010701995701766776
+    },
+    "recovery": {
+      "scenario": "recovery",
+      "period_days": 78,
+      "total_return": 0.01956003046216459,
+      "annual_return": 0.06458372014333036,
+      "volatility": 0.04265895006775161,
+      "sharpe_ratio": 1.5139547513653637,
+      "max_drawdown": -0.018835133137578175,
+      "var_95": 0.0,
+      "var_99": -0.005203816024936467,
+      "cvar_95": -0.0002873715772455083,
+      "cvar_99": -0.01726024985928465,
+      "win_rate": 0.10256410256410256,
+      "avg_win": 0.004971099396015227,
+      "avg_loss": -0.006705336802395194
+    },
+    "volatility": {
+      "error": "Insufficient data for volatility scenario"
+    },
+    "bull_market": {
+      "scenario": "bull_market",
+      "period_days": 1492,
+      "total_return": 0.021731312055561336,
+      "annual_return": 0.0036377234334514785,
+      "volatility": 0.02013449115251715,
+      "sharpe_ratio": 0.18067123752450542,
+      "max_drawdown": -0.02383047023841253,
+      "var_95": 0.0,
+      "var_99": -0.0004238241389393747,
+      "cvar_95": -7.142956238440085e-05,
+      "cvar_99": -0.0069639612995895306,
+      "win_rate": 0.015415549597855228,
+      "avg_win": 0.005548969143370957,
+      "avg_loss": -0.006172354537804991
+    },
+    "bear_market": {
+      "scenario": "bear_market",
+      "period_days": 1492,
+      "total_return": 0.021731312055561336,
+      "annual_return": 0.0036377234334514785,
+      "volatility": 0.02013449115251715,
+      "sharpe_ratio": 0.18067123752450542,
+      "max_drawdown": -0.02383047023841253,
+      "var_95": 0.0,
+      "var_99": -0.0004238241389393747,
+      "cvar_95": -7.142956238440085e-05,
+      "cvar_99": -0.0069639612995895306,
+      "win_rate": 0.015415549597855228,
+      "avg_win": 0.005548969143370957,
+      "avg_loss": -0.006172354537804991
+    }
+  },
+  "risk_metrics": {
+    "var_95": NaN,
+    "var_99": NaN,
+    "expected_shortfall_95": NaN,
+    "expected_shortfall_99": NaN
+  },
+  "correlation_analysis": {
+    "bri_vix_correlation": 0.1396020141499252,
+    "bri_market_correlation": -0.053818325035475637
+  }
+}

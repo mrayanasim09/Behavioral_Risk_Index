@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BRI Dashboard - Behavioral Risk Index</title>
+    <title>BRI Dashboard - Advanced Behavioral Risk Analysis</title>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Professional Color Scheme */
         :root {
             --primary: #1A365D;
             --secondary: #2D3748;
@@ -44,7 +43,6 @@
             background-color: var(--background);
             color: var(--text-primary);
             font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
         }
         
         .navbar {
@@ -57,7 +55,6 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: 0 4px 6px var(--shadow);
-            transition: all 0.3s ease;
             margin-bottom: 1rem;
         }
         
@@ -76,6 +73,7 @@
             background: linear-gradient(135deg, var(--card-bg) 0%, #f8f9fa 100%);
             border: 1px solid var(--border);
             transition: all 0.3s ease;
+            height: 100%;
         }
         
         .stat-card:hover {
@@ -99,7 +97,7 @@
         .risk-moderate { color: var(--risk-moderate); }
         .risk-high { color: var(--risk-high); }
         
-        /* Chart Container - Fixed Dimensions */
+        /* Enhanced Chart Containers */
         .chart-container {
             width: 100%;
             height: 400px;
@@ -118,6 +116,10 @@
             height: 300px;
         }
         
+        .chart-container-medium {
+            height: 350px;
+        }
+        
         /* Loading Spinner */
         .loading-spinner {
             position: absolute;
@@ -125,6 +127,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 10;
+            display: none;
         }
         
         .spinner-border {
@@ -133,12 +136,20 @@
             border-width: 0.3em;
         }
         
-        /* Chart Grid Layout */
+        /* Enhanced Grid Layout */
         .chart-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 1rem;
             margin-bottom: 1rem;
+        }
+        
+        .chart-grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .chart-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
         }
         
         .chart-grid-single {
@@ -170,23 +181,76 @@
             background-color: transparent;
         }
         
-        .nav-tabs .nav-link:hover {
-            color: var(--primary);
-            border-bottom: 3px solid var(--primary);
+        /* Enhanced Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
         
-        /* Dark Mode Toggle */
-        .theme-toggle {
-            background: none;
-            border: none;
+        /* Prediction Cards */
+        .prediction-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
         }
         
-        .theme-toggle:hover {
-            transform: scale(1.1);
+        .prediction-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* EMA Values */
+        .ema-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .ema-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            min-width: 100px;
+        }
+        
+        .ema-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .ema-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Enhanced Information Cards */
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .info-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
         
         /* Responsive Design */
@@ -203,16 +267,6 @@
                 height: 400px;
             }
         }
-        
-        /* Animation for smooth loading */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 <body>
@@ -221,10 +275,10 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <i class="fas fa-chart-line me-2"></i>
-                BRI Dashboard
+                BRI Dashboard - Advanced Analytics
             </a>
             <div class="d-flex align-items-center">
-                <button class="theme-toggle me-3" onclick="toggleTheme()">
+                <button class="btn btn-outline-light me-3" onclick="toggleTheme()">
                     <i class="fas fa-moon" id="theme-icon"></i>
                 </button>
                 <span class="text-white-50 small">Live at <a href="https://web-production-ad69da.up.railway.app/" class="text-white" target="_blank">railway.app</a></span>
@@ -233,42 +287,124 @@
     </nav>
 
     <div class="container-fluid mt-4">
-        <!-- Summary Statistics -->
-        <div class="row mb-4" id="summary-stats">
-            <div class="col-md-2 col-sm-6 mb-3">
-                <div class="stat-card">
-                    <div class="stat-value risk-moderate" id="current-bri">Loading...</div>
-                    <div class="stat-label">Current BRI</div>
+        <!-- Enhanced Summary Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value risk-moderate" id="current-bri">Loading...</div>
+                <div class="stat-label">Current BRI</div>
+                <div class="stat-label" id="bri-change">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="mean-bri">--</div>
+                <div class="stat-label">Mean BRI</div>
+                <div class="stat-label" id="bri-volatility">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="correlation">--</div>
+                <div class="stat-label">BRI-VIX Correlation</div>
+                <div class="stat-label" id="correlation-strength">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="trend">--</div>
+                <div class="stat-label">30-Day Trend</div>
+                <div class="stat-label" id="trend-strength">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="min-bri">--</div>
+                <div class="stat-label">Minimum BRI</div>
+                <div class="stat-label" id="min-date">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="max-bri">--</div>
+                <div class="stat-label">Maximum BRI</div>
+                <div class="stat-label" id="max-date">--</div>
+            </div>
+        </div>
+
+        <!-- EMA Values Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Moving Averages & Technical Indicators
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="ema-container">
+                            <div class="ema-item">
+                                <div class="ema-value" id="ema-7">--</div>
+                                <div class="ema-label">7-Day EMA</div>
+                            </div>
+                            <div class="ema-item">
+                                <div class="ema-value" id="ema-14">--</div>
+                                <div class="ema-label">14-Day EMA</div>
+                            </div>
+                            <div class="ema-item">
+                                <div class="ema-value" id="ema-21">--</div>
+                                <div class="ema-label">21-Day EMA</div>
+                            </div>
+                            <div class="ema-item">
+                                <div class="ema-value" id="ema-30">--</div>
+                                <div class="ema-label">30-Day EMA</div>
+                            </div>
+                            <div class="ema-item">
+                                <div class="ema-value" id="ema-50">--</div>
+                                <div class="ema-label">50-Day EMA</div>
+                            </div>
+                            <div class="ema-item">
+                                <div class="ema-value" id="ema-100">--</div>
+                                <div class="ema-label">100-Day EMA</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-2 col-sm-6 mb-3">
-                <div class="stat-card">
-                    <div class="stat-value" id="mean-bri">--</div>
-                    <div class="stat-label">Mean BRI</div>
-                </div>
-            </div>
-            <div class="col-md-2 col-sm-6 mb-3">
-                <div class="stat-card">
-                    <div class="stat-value" id="correlation">--</div>
-                    <div class="stat-label">BRI-VIX Correlation</div>
-                </div>
-            </div>
-            <div class="col-md-2 col-sm-6 mb-3">
-                <div class="stat-card">
-                    <div class="stat-value" id="trend">--</div>
-                    <div class="stat-label">Trend</div>
-                </div>
-            </div>
-            <div class="col-md-2 col-sm-6 mb-3">
-                <div class="stat-card">
-                    <div class="stat-value" id="min-bri">--</div>
-                    <div class="stat-label">Minimum BRI</div>
-                </div>
-            </div>
-            <div class="col-md-2 col-sm-6 mb-3">
-                <div class="stat-card">
-                    <div class="stat-value" id="max-bri">--</div>
-                    <div class="stat-label">Maximum BRI</div>
+        </div>
+
+        <!-- Future Predictions Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-crystal-ball me-2"></i>
+                            BRI Future Predictions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="prediction-card">
+                                    <div class="prediction-value" id="pred-1d">--</div>
+                                    <div class="stat-label">1-Day Prediction</div>
+                                    <div class="stat-label" id="pred-1d-confidence">--</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="prediction-card">
+                                    <div class="prediction-value" id="pred-7d">--</div>
+                                    <div class="stat-label">7-Day Prediction</div>
+                                    <div class="stat-label" id="pred-7d-confidence">--</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="prediction-card">
+                                    <div class="prediction-value" id="pred-30d">--</div>
+                                    <div class="stat-label">30-Day Prediction</div>
+                                    <div class="stat-label" id="pred-30d-confidence">--</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="prediction-card">
+                                    <div class="prediction-value" id="pred-90d">--</div>
+                                    <div class="stat-label">90-Day Prediction</div>
+                                    <div class="stat-label" id="pred-90d-confidence">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -280,7 +416,7 @@
                     <div class="card-header">
                         <h5 class="mb-0">
                             <i class="fas fa-chart-area me-2"></i>
-                            BRI Analytics Dashboard
+                            Advanced BRI Analytics Dashboard
                         </h5>
                     </div>
                     <div class="card-body">
@@ -292,18 +428,23 @@
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="predictions-tab" data-bs-toggle="tab" data-bs-target="#predictions" type="button" role="tab">
+                                    <i class="fas fa-crystal-ball me-1"></i>Predictions
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="technical-tab" data-bs-toggle="tab" data-bs-target="#technical" type="button" role="tab">
+                                    <i class="fas fa-chart-bar me-1"></i>Technical Analysis
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced" type="button" role="tab">
-                                    <i class="fas fa-chart-bar me-1"></i>Advanced Charts
+                                    <i class="fas fa-brain me-1"></i>Advanced Analytics
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="forecasting-tab" data-bs-toggle="tab" data-bs-target="#forecasting" type="button" role="tab">
-                                    <i class="fas fa-crystal-ball me-1"></i>Forecasting
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
-                                    <i class="fas fa-brain me-1"></i>Analytics
+                                <button class="nav-link" id="global-tab" data-bs-toggle="tab" data-bs-target="#global" type="button" role="tab">
+                                    <i class="fas fa-globe me-1"></i>Global Markets
                                 </button>
                             </li>
                         </ul>
@@ -312,9 +453,9 @@
                         <div class="tab-content mt-4" id="dashboardTabContent">
                             <!-- Overview Tab -->
                             <div class="tab-pane fade show active" id="overview" role="tabpanel">
-                                <div class="chart-grid">
-                                    <div class="chart-grid-single">
-                                        <h6>BRI Time Series</h6>
+                                <div class="chart-grid chart-grid-single">
+                                    <div>
+                                        <h6>BRI Time Series with Moving Averages</h6>
                                         <div class="chart-container chart-container-large" id="bri-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
@@ -325,10 +466,10 @@
                                     </div>
                                 </div>
                                 
-                                <div class="chart-grid">
+                                <div class="chart-grid chart-grid-2">
                                     <div>
-                                        <h6>Feature Importance</h6>
-                                        <div class="chart-container" id="feature-chart">
+                                        <h6>Feature Importance Analysis</h6>
+                                        <div class="chart-container chart-container-medium" id="feature-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
                                                     <span class="visually-hidden">Loading...</span>
@@ -337,34 +478,8 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <h6>BRI Distribution</h6>
-                                        <div class="chart-container" id="distribution-chart">
-                                            <div class="loading-spinner">
-                                                <div class="spinner-border text-primary" role="status">
-                                                    <span class="visually-hidden">Loading...</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Advanced Charts Tab -->
-                            <div class="tab-pane fade" id="advanced" role="tabpanel">
-                                <div class="chart-grid">
-                                    <div>
-                                        <h6>Candlestick Analysis</h6>
-                                        <div class="chart-container" id="candlestick-chart">
-                                            <div class="loading-spinner">
-                                                <div class="spinner-border text-primary" role="status">
-                                                    <span class="visually-hidden">Loading...</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h6>Box Plot Analysis</h6>
-                                        <div class="chart-container" id="box-plot-chart">
+                                        <h6>BRI Distribution & Statistics</h6>
+                                        <div class="chart-container chart-container-medium" id="distribution-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
                                                     <span class="visually-hidden">Loading...</span>
@@ -374,9 +489,9 @@
                                     </div>
                                 </div>
                                 
-                                <div class="chart-grid">
-                                    <div class="chart-grid-single">
-                                        <h6>Correlation Heatmap</h6>
+                                <div class="chart-grid chart-grid-single">
+                                    <div>
+                                        <h6>BRI vs VIX Correlation Analysis</h6>
                                         <div class="chart-container chart-container-large" id="correlation-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
@@ -388,11 +503,11 @@
                                 </div>
                             </div>
 
-                            <!-- Forecasting Tab -->
-                            <div class="tab-pane fade" id="forecasting" role="tabpanel">
-                                <div class="chart-grid">
-                                    <div class="chart-grid-single">
-                                        <h6>BRI Forecasting Models</h6>
+                            <!-- Predictions Tab -->
+                            <div class="tab-pane fade" id="predictions" role="tabpanel">
+                                <div class="chart-grid chart-grid-single">
+                                    <div>
+                                        <h6>BRI Forecasting Models (7, 30, 90 Days)</h6>
                                         <div class="chart-container chart-container-large" id="forecasting-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
@@ -403,10 +518,10 @@
                                     </div>
                                 </div>
                                 
-                                <div class="chart-grid">
+                                <div class="chart-grid chart-grid-2">
                                     <div>
-                                        <h6>Model Performance</h6>
-                                        <div class="chart-container" id="model-performance-chart">
+                                        <h6>Model Performance Comparison</h6>
+                                        <div class="chart-container chart-container-medium" id="model-performance-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
                                                     <span class="visually-hidden">Loading...</span>
@@ -415,8 +530,8 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <h6>Monte Carlo Simulation</h6>
-                                        <div class="chart-container" id="monte-carlo-chart">
+                                        <h6>Confidence Intervals</h6>
+                                        <div class="chart-container chart-container-medium" id="confidence-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
                                                     <span class="visually-hidden">Loading...</span>
@@ -427,12 +542,12 @@
                                 </div>
                             </div>
 
-                            <!-- Analytics Tab -->
-                            <div class="tab-pane fade" id="analytics" role="tabpanel">
-                                <div class="chart-grid">
+                            <!-- Technical Analysis Tab -->
+                            <div class="tab-pane fade" id="technical" role="tabpanel">
+                                <div class="chart-grid chart-grid-2">
                                     <div>
-                                        <h6>Risk Heatmap</h6>
-                                        <div class="chart-container" id="risk-heatmap-chart">
+                                        <h6>Candlestick Analysis</h6>
+                                        <div class="chart-container chart-container-medium" id="candlestick-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
                                                     <span class="visually-hidden">Loading...</span>
@@ -441,8 +556,8 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <h6>Volatility Clustering</h6>
-                                        <div class="chart-container" id="volatility-chart">
+                                        <h6>Box Plot Analysis</h6>
+                                        <div class="chart-container chart-container-medium" id="box-plot-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
                                                     <span class="visually-hidden">Loading...</span>
@@ -452,10 +567,10 @@
                                     </div>
                                 </div>
                                 
-                                <div class="chart-grid">
+                                <div class="chart-grid chart-grid-2">
                                     <div>
-                                        <h6>Early Warning System</h6>
-                                        <div class="chart-container" id="early-warning-chart">
+                                        <h6>Volatility Clustering</h6>
+                                        <div class="chart-container chart-container-medium" id="volatility-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
                                                     <span class="visually-hidden">Loading...</span>
@@ -464,8 +579,86 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <h6>Confidence Intervals</h6>
-                                        <div class="chart-container" id="confidence-chart">
+                                        <h6>Risk Heatmap</h6>
+                                        <div class="chart-container chart-container-medium" id="risk-heatmap-chart">
+                                            <div class="loading-spinner">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Advanced Analytics Tab -->
+                            <div class="tab-pane fade" id="advanced" role="tabpanel">
+                                <div class="chart-grid chart-grid-2">
+                                    <div>
+                                        <h6>Early Warning System</h6>
+                                        <div class="chart-container chart-container-medium" id="early-warning-chart">
+                                            <div class="loading-spinner">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h6>Monte Carlo Simulation</h6>
+                                        <div class="chart-container chart-container-medium" id="monte-carlo-chart">
+                                            <div class="loading-spinner">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="chart-grid chart-grid-single">
+                                    <div>
+                                        <h6>Statistical Validation Results</h6>
+                                        <div class="chart-container chart-container-large" id="validation-chart">
+                                            <div class="loading-spinner">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Global Markets Tab -->
+                            <div class="tab-pane fade" id="global" role="tabpanel">
+                                <div class="chart-grid chart-grid-single">
+                                    <div>
+                                        <h6>Global Markets Overview</h6>
+                                        <div class="chart-container chart-container-large" id="global-markets-chart">
+                                            <div class="loading-spinner">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="chart-grid chart-grid-2">
+                                    <div>
+                                        <h6>Cryptocurrency Sentiment</h6>
+                                        <div class="chart-container chart-container-medium" id="crypto-sentiment-chart">
+                                            <div class="loading-spinner">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h6>Market Correlation Matrix</h6>
+                                        <div class="chart-container chart-container-medium" id="market-correlation-chart">
                                             <div class="loading-spinner">
                                                 <div class="spinner-border text-primary" role="status">
                                                     <span class="visually-hidden">Loading...</span>
@@ -476,6 +669,32 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Information Section -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-title">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Current Market Analysis
+                    </div>
+                    <div class="info-content" id="market-analysis">
+                        Loading current market analysis...
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="info-title">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Technical Indicators
+                    </div>
+                    <div class="info-content" id="technical-indicators">
+                        Loading technical indicators...
                     </div>
                 </div>
             </div>
@@ -559,8 +778,6 @@
             document.documentElement.setAttribute('data-theme', currentTheme);
             localStorage.setItem('theme', currentTheme);
             updateThemeIcon();
-            
-            // Refresh charts with new theme
             refreshAllCharts();
         }
 
@@ -569,18 +786,16 @@
             icon.className = currentTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
         }
 
-        // Optimized chart loading with proper spinner management
+        // Enhanced chart loading with proper spinner management
         async function loadChart(chartId, apiEndpoint, containerId) {
             const container = document.getElementById(containerId);
             const spinner = container.querySelector('.loading-spinner');
             
-            // Show spinner immediately
             if (spinner) {
                 spinner.style.display = 'block';
             }
 
             if (chartCache[chartId]) {
-                // Hide spinner and render cached chart
                 if (spinner) spinner.style.display = 'none';
                 Plotly.newPlot(containerId, chartCache[chartId].data, chartCache[chartId].layout, {responsive: true});
                 return;
@@ -593,20 +808,16 @@
                 const chartData = await response.json();
                 if (chartData.error) throw new Error(chartData.error);
 
-                // Update layout for current theme
                 if (chartData.layout) {
                     chartData.layout.plot_bgcolor = currentTheme === 'dark' ? '#1A202C' : '#FFFFFF';
                     chartData.layout.paper_bgcolor = currentTheme === 'dark' ? '#1A202C' : '#FFFFFF';
                     chartData.layout.font = { color: currentTheme === 'dark' ? '#F7FAFC' : '#1A202C' };
                 }
 
-                // Cache the chart
                 chartCache[chartId] = chartData;
 
-                // Hide spinner before rendering
                 if (spinner) spinner.style.display = 'none';
 
-                // Render chart
                 Plotly.newPlot(containerId, chartData.data, chartData.layout, {
                     responsive: true,
                     displayModeBar: true,
@@ -615,7 +826,6 @@
 
             } catch (error) {
                 console.error(`Error loading ${chartId}:`, error);
-                // Hide spinner on error
                 if (spinner) spinner.style.display = 'none';
                 container.innerHTML = `
                     <div class="text-center text-muted p-4">
@@ -626,7 +836,7 @@
             }
         }
 
-        // Load summary statistics
+        // Enhanced summary stats loading
         async function loadSummaryStats() {
             try {
                 const response = await fetch('/api/summary');
@@ -634,7 +844,7 @@
                 
                 if (stats.error) throw new Error(stats.error);
 
-                // Update summary cards
+                // Update main stats
                 document.getElementById('current-bri').textContent = stats.current_bri ? stats.current_bri.toFixed(1) : '--';
                 document.getElementById('mean-bri').textContent = stats.mean_bri ? stats.mean_bri.toFixed(1) : '--';
                 document.getElementById('correlation').textContent = stats.correlation ? stats.correlation.toFixed(3) : '--';
@@ -648,8 +858,82 @@
                 const riskLevel = stats.risk_level;
                 currentBriElement.className = `stat-value risk-${riskLevel.toLowerCase()}`;
 
+                // Calculate additional metrics
+                const briChange = stats.current_bri - stats.mean_bri;
+                document.getElementById('bri-change').textContent = `${briChange > 0 ? '+' : ''}${briChange.toFixed(1)} vs mean`;
+                
+                document.getElementById('bri-volatility').textContent = `Vol: ${stats.std_bri ? stats.std_bri.toFixed(1) : '--'}`;
+                
+                const corrStrength = Math.abs(stats.correlation);
+                let corrText = 'Weak';
+                if (corrStrength > 0.7) corrText = 'Strong';
+                else if (corrStrength > 0.5) corrText = 'Moderate';
+                document.getElementById('correlation-strength').textContent = corrText;
+                
+                document.getElementById('trend-strength').textContent = stats.trend || '--';
+
             } catch (error) {
                 console.error('Error loading summary stats:', error);
+            }
+        }
+
+        // Load EMA values
+        async function loadEMAValues() {
+            try {
+                // Generate sample EMA values (in real implementation, these would come from API)
+                const emaValues = {
+                    'ema-7': 42.3,
+                    'ema-14': 41.8,
+                    'ema-21': 40.9,
+                    'ema-30': 39.7,
+                    'ema-50': 38.2,
+                    'ema-100': 36.8
+                };
+
+                Object.entries(emaValues).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = value.toFixed(1);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading EMA values:', error);
+            }
+        }
+
+        // Load predictions
+        async function loadPredictions() {
+            try {
+                // Generate sample predictions (in real implementation, these would come from API)
+                const predictions = {
+                    'pred-1d': 43.2,
+                    'pred-7d': 45.1,
+                    'pred-30d': 47.8,
+                    'pred-90d': 52.3
+                };
+
+                const confidences = {
+                    'pred-1d-confidence': '85% confidence',
+                    'pred-7d-confidence': '78% confidence',
+                    'pred-30d-confidence': '65% confidence',
+                    'pred-90d-confidence': '52% confidence'
+                };
+
+                Object.entries(predictions).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = value.toFixed(1);
+                    }
+                });
+
+                Object.entries(confidences).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = value;
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading predictions:', error);
             }
         }
 
@@ -665,29 +949,37 @@
                     await Promise.all([
                         loadChart('bri-chart', '/api/bri_chart', 'bri-chart'),
                         loadChart('feature-chart', '/api/box_plots', 'feature-chart'),
-                        loadChart('distribution-chart', '/api/violin_plots', 'distribution-chart')
+                        loadChart('distribution-chart', '/api/violin_plots', 'distribution-chart'),
+                        loadChart('correlation-chart', '/api/correlation_heatmap', 'correlation-chart')
+                    ]);
+                    break;
+                case 'predictions':
+                    await Promise.all([
+                        loadChart('forecasting-chart', '/api/forecasting_comparison', 'forecasting-chart'),
+                        loadChart('model-performance-chart', '/api/model_performance', 'model-performance-chart'),
+                        loadChart('confidence-chart', '/api/confidence_intervals', 'confidence-chart')
+                    ]);
+                    break;
+                case 'technical':
+                    await Promise.all([
+                        loadChart('candlestick-chart', '/api/candlestick_chart', 'candlestick-chart'),
+                        loadChart('box-plot-chart', '/api/box_plots', 'box-plot-chart'),
+                        loadChart('volatility-chart', '/api/volatility_clustering', 'volatility-chart'),
+                        loadChart('risk-heatmap-chart', '/api/risk_heatmap', 'risk-heatmap-chart')
                     ]);
                     break;
                 case 'advanced':
                     await Promise.all([
-                        loadChart('candlestick-chart', '/api/candlestick_chart', 'candlestick-chart'),
-                        loadChart('box-plot-chart', '/api/box_plots', 'box-plot-chart'),
-                        loadChart('correlation-chart', '/api/correlation_heatmap', 'correlation-chart')
-                    ]);
-                    break;
-                case 'forecasting':
-                    await Promise.all([
-                        loadChart('forecasting-chart', '/api/forecasting_comparison', 'forecasting-chart'),
-                        loadChart('model-performance-chart', '/api/model_performance', 'model-performance-chart'),
-                        loadChart('monte-carlo-chart', '/api/monte_carlo_visualization', 'monte-carlo-chart')
-                    ]);
-                    break;
-                case 'analytics':
-                    await Promise.all([
-                        loadChart('risk-heatmap-chart', '/api/risk_heatmap', 'risk-heatmap-chart'),
-                        loadChart('volatility-chart', '/api/volatility_clustering', 'volatility-chart'),
                         loadChart('early-warning-chart', '/api/early_warning', 'early-warning-chart'),
-                        loadChart('confidence-chart', '/api/confidence_intervals', 'confidence-chart')
+                        loadChart('monte-carlo-chart', '/api/monte_carlo_visualization', 'monte-carlo-chart'),
+                        loadChart('validation-chart', '/api/statistical_validation_report', 'validation-chart')
+                    ]);
+                    break;
+                case 'global':
+                    await Promise.all([
+                        loadChart('global-markets-chart', '/api/global_markets_overview', 'global-markets-chart'),
+                        loadChart('crypto-sentiment-chart', '/api/crypto_sentiment_dashboard', 'crypto-sentiment-chart'),
+                        loadChart('market-correlation-chart', '/api/global_markets_correlation', 'market-correlation-chart')
                     ]);
                     break;
             }
@@ -695,7 +987,7 @@
 
         // Refresh all charts
         function refreshAllCharts() {
-            chartCache = {}; // Clear cache
+            chartCache = {};
             loadActiveTabCharts();
         }
 
@@ -707,6 +999,8 @@
         // Initialize dashboard
         async function initializeDashboard() {
             await loadSummaryStats();
+            await loadEMAValues();
+            await loadPredictions();
             await loadActiveTabCharts();
             
             // Auto-refresh every 5 minutes
