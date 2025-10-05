@@ -17,6 +17,15 @@ from flask import Flask, render_template, jsonify, request
 import warnings
 warnings.filterwarnings('ignore')
 
+def clean_for_json(data):
+    """Clean data for JSON serialization by removing NaN values"""
+    if hasattr(data, 'dropna'):
+        return data.dropna()
+    elif isinstance(data, (list, tuple)):
+        return [x for x in data if not (isinstance(x, float) and np.isnan(x))]
+    else:
+        return data
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -205,8 +214,8 @@ def api_bri_chart():
     
     # Add BRI line
     fig.add_trace(go.Scatter(
-        x=analyzer.bri_data['date'].tolist(),
-        y=analyzer.bri_data['BRI'].tolist(),
+        x=clean_for_json(analyzer.bri_data['date']).tolist(),
+        y=clean_for_json(analyzer.bri_data['BRI']).tolist(),
         mode='lines',
         name='BRI',
         line=dict(color='blue', width=2)
@@ -214,9 +223,13 @@ def api_bri_chart():
     
     # Add 7-day moving average
     bri_smooth = analyzer.bri_data['BRI'].rolling(window=7, center=True).mean()
+    # Remove NaN values for JSON serialization
+    smooth_data = clean_for_json(bri_smooth)
+    smooth_dates = analyzer.bri_data['date'].iloc[smooth_data.index]
+    
     fig.add_trace(go.Scatter(
-        x=analyzer.bri_data['date'].tolist(),
-        y=bri_smooth.tolist(),
+        x=clean_for_json(smooth_dates).tolist(),
+        y=clean_for_json(smooth_data).tolist(),
         mode='lines',
         name='7-Day MA',
         line=dict(color='darkblue', width=3)
@@ -262,8 +275,8 @@ def api_correlation_chart():
     fig = go.Figure()
     
     fig.add_trace(go.Scatter(
-        x=merged['BRI'].tolist(),
-        y=merged['Close_^VIX'].tolist(),
+        x=clean_for_json(merged['BRI']).tolist(),
+        y=clean_for_json(merged['Close_^VIX']).tolist(),
         mode='markers',
         name='BRI vs VIX',
         marker=dict(
@@ -339,7 +352,7 @@ def api_distribution_chart():
     
     # Add histogram
     fig.add_trace(go.Histogram(
-        x=analyzer.bri_data['BRI'].tolist(),
+        x=clean_for_json(analyzer.bri_data['BRI']).tolist(),
         nbinsx=30,
         name='BRI Distribution',
         marker_color='green',
