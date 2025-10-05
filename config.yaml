@@ -1,0 +1,318 @@
+# Behavioral Risk Index (BRI) Configuration
+# Centralized configuration management for the BRI dashboard
+
+# Application Settings
+app:
+  name: "Enhanced BRI Dashboard"
+  version: "2.0.0"
+  debug: false
+  host: "0.0.0.0"
+  port: 5000
+  auto_reload: true
+
+# Data Sources Configuration
+data_sources:
+  # GDELT Configuration
+  gdelt:
+    enabled: true
+    base_url: "https://api.gdeltproject.org/api/v2/doc/doc"
+    export_url: "https://api.gdeltproject.org/api/v2/doc/doc"
+    max_retries: 3
+    timeout: 30
+    rate_limit: 1  # requests per second
+    
+  # Reddit Configuration
+  reddit:
+    enabled: true
+    subreddits:
+      - "investing"
+      - "stocks"
+      - "SecurityAnalysis"
+      - "ValueInvesting"
+      - "dividends"
+      - "options"
+      - "wallstreetbets"
+      - "StockMarket"
+      - "investing"
+      - "SecurityAnalysis"
+      - "ValueInvesting"
+      - "dividends"
+      - "options"
+      - "wallstreetbets"
+      - "StockMarket"
+      - "investing"
+      - "SecurityAnalysis"
+      - "ValueInvesting"
+      - "dividends"
+      - "options"
+      - "wallstreetbets"
+      - "StockMarket"
+      - "investing"
+      - "SecurityAnalysis"
+      - "ValueInvesting"
+      - "dividends"
+      - "options"
+      - "wallstreetbets"
+      - "StockMarket"
+      - "investing"
+      - "SecurityAnalysis"
+      - "ValueInvesting"
+      - "dividends"
+      - "options"
+      - "wallstreetbets"
+      - "StockMarket"
+      - "investing"
+      - "SecurityAnalysis"
+      - "ValueInvesting"
+      - "dividends"
+      - "options"
+      - "wallstreetbets"
+      - "StockMarket"
+      - "investing"
+      - "SecurityAnalysis"
+      - "ValueInvesting"
+      - "dividends"
+      - "options"
+      - "wallstreetbets"
+      - "StockMarket"
+    post_limit: 100
+    comment_limit: 50
+    
+  # Yahoo Finance Configuration
+  yahoo_finance:
+    enabled: true
+    symbols:
+      - "^VIX"  # Volatility Index
+      - "^GSPC"  # S&P 500
+      - "^IXIC"  # NASDAQ
+      - "^DJI"   # Dow Jones
+    period: "2y"
+    interval: "1d"
+
+# BRI Calculation Configuration
+bri_calculation:
+  # Feature Weights (must sum to 1.0)
+  weights:
+    sentiment_volatility: 0.30
+    media_herding: 0.20
+    news_tone: 0.20
+    event_density: 0.20
+    polarity_skew: 0.10
+  
+  # Normalization Settings
+  normalization:
+    method: "minmax"  # minmax, zscore, robust
+    range: [0, 100]
+    
+  # Risk Thresholds
+  risk_thresholds:
+    low: 30
+    moderate: 60
+    high: 100
+
+# Advanced Analytics Configuration
+analytics:
+  # Volatility Clustering
+  volatility_clustering:
+    enabled: true
+    n_clusters: 3
+    features:
+      - "bri_volatility"
+      - "bri_abs_change"
+      - "bri_ma_ratio"
+    window_size: 7
+    
+  # Early Warning System
+  early_warning:
+    enabled: true
+    threshold_percentile: 90
+    lookback_days: 30
+    alert_methods:
+      - "email"
+      - "webhook"
+      - "dashboard"
+    
+  # Forecasting
+  forecasting:
+    enabled: true
+    prediction_days: 7
+    confidence_level: 0.95
+    methods:
+      - "arima"
+      - "exponential_smoothing"
+      - "linear_regression"
+    
+  # Risk Heatmap
+  risk_heatmap:
+    enabled: true
+    window_size: 7
+    aggregation: "monthly"  # daily, weekly, monthly
+    
+  # Monte Carlo Simulation
+  monte_carlo:
+    enabled: true
+    n_simulations: 1000
+    time_horizon: 30  # days
+    confidence_levels: [0.95, 0.99]
+
+# Model Configuration
+models:
+  # Sentiment Analysis
+  sentiment:
+    model: "finbert"  # finbert, textblob, vader
+    confidence_threshold: 0.7
+    
+  # Weight Optimization
+  weight_optimization:
+    enabled: true
+    method: "pca"  # pca, grid_search, genetic_algorithm
+    optimization_metric: "correlation"  # correlation, sharpe_ratio, information_ratio
+    
+  # Predictive Models
+  predictive:
+    lstm:
+      enabled: true
+      sequence_length: 30
+      hidden_units: 50
+      epochs: 100
+      batch_size: 32
+      
+    random_forest:
+      enabled: true
+      n_estimators: 100
+      max_depth: 10
+      random_state: 42
+      
+    xgboost:
+      enabled: true
+      n_estimators: 100
+      max_depth: 6
+      learning_rate: 0.1
+
+# Visualization Configuration
+visualization:
+  # Chart Settings
+  charts:
+    default_height: 500
+    responsive: true
+    theme: "professional"  # professional, dark, light
+    
+  # Color Scheme
+  colors:
+    primary: "#1A365D"
+    secondary: "#2D3748"
+    accent: "#C53030"
+    risk_low: "#38A169"
+    risk_moderate: "#D69E2E"
+    risk_high: "#E53E3E"
+    
+  # Export Settings
+  export:
+    formats: ["png", "pdf", "svg"]
+    dpi: 300
+    width: 1200
+    height: 800
+
+# Alert Configuration
+alerts:
+  # Email Alerts
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    username: ""
+    password: ""
+    recipients: []
+    
+  # Webhook Alerts
+  webhook:
+    enabled: false
+    url: ""
+    timeout: 10
+    
+  # Dashboard Alerts
+  dashboard:
+    enabled: true
+    show_notifications: true
+    auto_dismiss: 5000  # milliseconds
+
+# Performance Configuration
+performance:
+  # Caching
+  cache:
+    enabled: true
+    ttl: 300  # seconds
+    max_size: 1000
+    
+  # Rate Limiting
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    
+  # Data Processing
+  data_processing:
+    batch_size: 1000
+    parallel_processing: true
+    max_workers: 4
+
+# Security Configuration
+security:
+  # API Security
+  api:
+    rate_limit: 100  # requests per hour
+    api_key_required: false
+    cors_enabled: true
+    
+  # Data Security
+  data:
+    encryption: false
+    backup_enabled: true
+    retention_days: 365
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/bri_dashboard.log"
+  max_size: 10485760  # 10MB
+  backup_count: 5
+
+# Database Configuration (if using database)
+database:
+  enabled: false
+  type: "sqlite"  # sqlite, postgresql, mysql
+  host: "localhost"
+  port: 5432
+  name: "bri_dashboard"
+  username: ""
+  password: ""
+
+# Deployment Configuration
+deployment:
+  # Environment
+  environment: "production"  # development, staging, production
+  
+  # Health Checks
+  health_check:
+    enabled: true
+    endpoint: "/health"
+    interval: 30  # seconds
+    
+  # Monitoring
+  monitoring:
+    enabled: true
+    metrics_endpoint: "/metrics"
+    prometheus_enabled: false
+
+# Feature Flags
+features:
+  advanced_analytics: true
+  real_time_updates: true
+  mobile_optimization: true
+  dark_mode: true
+  export_functionality: true
+  annotation_tools: true
+  multi_market_support: false
+  cryptocurrency_sentiment: false
+  api_documentation: true
+  user_authentication: false

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced BRI Dashboard - Advanced Analytics</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Professional Color Scheme */
+        :root {
+            /* Light Mode Colors - More Sophisticated */
+            --primary: #1A365D;
+            --secondary: #2D3748;
+            --accent: #C53030;
+            --background: #F7FAFC;
+            --card-bg: #FFFFFF;
+            --text-primary: #1A202C;
+            --text-secondary: #4A5568;
+            --border: #E2E8F0;
+            --shadow: rgba(26, 32, 44, 0.1);
+            
+            /* Risk Colors - More Professional */
+            --risk-low: #38A169;
+            --risk-moderate: #D69E2E;
+            --risk-high: #E53E3E;
+            --vix-overlay: #2D3748;
+            --moving-avg: #3182CE;
+            
+            /* Chart Colors */
+            --chart-bg: #FFFFFF;
+            --chart-grid: #E2E8F0;
+            --chart-text: #1A202C;
+        }
+        
+        /* Dark Mode Colors - Professional Dark Theme */
+        [data-theme="dark"] {
+            --primary: #2B6CB0;
+            --secondary: #4A5568;
+            --accent: #FC8181;
+            --background: #0F1419;
+            --card-bg: #1A202C;
+            --text-primary: #F7FAFC;
+            --text-secondary: #A0AEC0;
+            --border: #2D3748;
+            --shadow: rgba(0, 0, 0, 0.4);
+            
+            /* Risk Colors - Dark Mode */
+            --risk-low: #68D391;
+            --risk-moderate: #F6E05E;
+            --risk-high: #FC8181;
+            --vix-overlay: #4A5568;
+            --moving-avg: #63B3ED;
+            
+            /* Chart Colors - Dark Mode */
+            --chart-bg: #1A202C;
+            --chart-grid: #2D3748;
+            --chart-text: #F7FAFC;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px var(--shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-bottom: none;
+            border-radius: 12px 12px 0 0 !important;
+            font-weight: 600;
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--card-bg) 0%, #F8F9FA 100%);
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .chart-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+        
+        .spinner-border {
+            color: var(--primary);
+        }
+        
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .theme-toggle-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+        
+        .nav-tabs {
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .nav-tabs .nav-link:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .analytics-section {
+            margin-top: 2rem;
+        }
+        
+        .feature-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-item {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button class="theme-toggle-btn" id="theme-toggle" title="Toggle Dark Mode">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line me-2"></i>
+                Enhanced BRI Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    <i class="fas fa-clock me-1"></i>
+                    <span id="current-time"></span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Summary Cards -->
+        <div class="row" id="summary-cards">
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="current-bri">--</div>
+                    <div class="metric-label">Current BRI</div>
+                    <div class="mt-2">
+                        <span class="badge" id="risk-level-badge">Loading...</span>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">Real-time behavioral risk</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="mean-bri">--</div>
+                    <div class="metric-label">Mean BRI</div>
+                    <div class="mt-2">
+                        <small class="text-muted">Historical Average</small>
+                    </div>
+                    <div class="mt-1">
+                        <small class="text-muted">±<span id="std-bri">--</span> std dev</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="correlation">--</div>
+                    <div class="metric-label">BRI-VIX Correlation</div>
+                    <div class="mt-2">
+                        <small class="text-muted">Market Relationship</small>
+                    </div>
+                    <div class="mt-1">
+                        <small class="text-muted">R² = <span id="r-squared">--</span></small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="trend">--</div>
+                    <div class="metric-label">Trend</div>
+                    <div class="mt-2">
+                        <small class="text-muted">30-Day Direction</small>
+                    </div>
+                    <div class="mt-1">
+                        <small class="text-muted">Data points: <span id="data-points">--</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Analytics Tabs -->
+        <div class="analytics-section">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Advanced Analytics Dashboard
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="analytics-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                                <i class="fas fa-chart-line me-1"></i>Overview
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="risk-heatmap-tab" data-bs-toggle="tab" data-bs-target="#risk-heatmap" type="button" role="tab">
+                                <i class="fas fa-fire me-1"></i>Risk Heatmap
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="volatility-tab" data-bs-toggle="tab" data-bs-target="#volatility" type="button" role="tab">
+                                <i class="fas fa-wave-square me-1"></i>Volatility Clustering
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="warning-tab" data-bs-toggle="tab" data-bs-target="#warning" type="button" role="tab">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Early Warning
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="forecast-tab" data-bs-toggle="tab" data-bs-target="#forecast" type="button" role="tab">
+                                <i class="fas fa-crystal-ball me-1"></i>Forecasting
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="analytics-tab-content">
+                        <!-- Overview Tab -->
+                        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                            <div class="row mt-3">
+                                <div class="col-lg-8">
+                                    <div class="chart-container">
+                                        <div id="bri-chart" class="loading">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <p class="mt-2">Loading BRI Chart...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="stats-grid">
+                                        <div class="stat-item">
+                                            <div class="stat-value" id="min-bri">--</div>
+                                            <div class="stat-label">Minimum BRI</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value" id="max-bri">--</div>
+                                            <div class="stat-label">Maximum BRI</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value" id="volatility">--</div>
+                                            <div class="stat-label">BRI Volatility</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value" id="last-updated">--</div>
+                                            <div class="stat-label">Last Updated</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Risk Heatmap Tab -->
+                        <div class="tab-pane fade" id="risk-heatmap" role="tabpanel">
+                            <div class="mt-3">
+                                <div class="chart-container">
+                                    <div id="risk-heatmap-chart" class="loading">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">Loading Risk Heatmap...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Volatility Clustering Tab -->
+                        <div class="tab-pane fade" id="volatility" role="tabpanel">
+                            <div class="mt-3">
+                                <div class="chart-container">
+                                    <div id="volatility-chart" class="loading">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">Loading Volatility Clustering...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Early Warning Tab -->
+                        <div class="tab-pane fade" id="warning" role="tabpanel">
+                            <div class="mt-3">
+                                <div class="chart-container">
+                                    <div id="warning-chart" class="loading">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">Loading Early Warning System...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Forecasting Tab -->
+                        <div class="tab-pane fade" id="forecast" role="tabpanel">
+                            <div class="mt-3">
+                                <div class="chart-container">
+                                    <div id="forecast-chart" class="loading">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2">Loading Forecasting Model...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Information Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i>
+                            Advanced Analytics Features
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-fire text-primary"></i> Risk Heatmap</h6>
+                                <p class="text-muted">
+                                    Visual representation of risk levels over time, showing monthly aggregation 
+                                    of BRI values with color-coded risk categories. Helps identify patterns 
+                                    and seasonal trends in market behavioral risk.
+                                </p>
+                                
+                                <h6><i class="fas fa-wave-square text-secondary"></i> Volatility Clustering</h6>
+                                <p class="text-muted">
+                                    Advanced machine learning analysis that groups market periods into 
+                                    low, moderate, and high volatility clusters. Uses K-means clustering 
+                                    on volatility features to identify distinct market regimes.
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-exclamation-triangle text-accent"></i> Early Warning System</h6>
+                                <p class="text-muted">
+                                    Dynamic threshold-based system that detects potential risk spikes 
+                                    before they occur. Uses rolling percentiles to identify unusual 
+                                    BRI movements and provides early alerts for risk management.
+                                </p>
+                                
+                                <h6><i class="fas fa-crystal-ball text-primary"></i> Forecasting & Confidence Intervals</h6>
+                                <p class="fas fa-crystal-ball text-primary"></i> Forecasting & Confidence Intervals</h6>
+                                <p class="text-muted">
+                                    Predictive analytics with confidence intervals for BRI forecasting. 
+                                    Provides 7-day ahead predictions with uncertainty quantification 
+                                    to support risk management decisions.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentTheme = 'light';
+        let autoRefreshInterval;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            updateCurrentTime();
+            loadDashboard();
+            setupTabListeners();
+            
+            // Auto-refresh every 5 minutes
+            autoRefreshInterval = setInterval(loadDashboard, 300000);
+        });
+
+        // Theme management
+        function initializeTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const body = document.body;
+            
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            body.setAttribute('data-theme', savedTheme);
+            currentTheme = savedTheme;
+            updateThemeIcon(savedTheme);
+            
+            themeToggle.addEventListener('click', function() {
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                currentTheme = newTheme;
+                updateThemeIcon(newTheme);
+                
+                // Refresh charts with new theme
+                setTimeout(() => {
+                    loadDashboard();
+                }, 100);
+            });
+        }
+
+        function updateThemeIcon(theme) {
+            const themeIcon = document.getElementById('theme-icon');
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+            }
+        }
+
+        // Time update
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('current-time').textContent = timeString;
+            setTimeout(updateCurrentTime, 1000);
+        }
+
+        // Tab listeners
+        function setupTabListeners() {
+            const tabs = document.querySelectorAll('#analytics-tabs button[data-bs-toggle="tab"]');
+            tabs.forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(event) {
+                    const target = event.target.getAttribute('data-bs-target');
+                    loadTabContent(target);
+                });
+            });
+        }
+
+        // Load tab content
+        function loadTabContent(target) {
+            switch(target) {
+                case '#overview':
+                    loadBRIChart();
+                    break;
+                case '#risk-heatmap':
+                    loadRiskHeatmap();
+                    break;
+                case '#volatility':
+                    loadVolatilityClustering();
+                    break;
+                case '#warning':
+                    loadEarlyWarning();
+                    break;
+                case '#forecast':
+                    loadForecasting();
+                    break;
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/summary');
+                if (!response.ok) throw new Error('Failed to load summary');
+                
+                const data = await response.json();
+                updateSummaryCards(data);
+                loadBRIChart();
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        // Update summary cards
+        function updateSummaryCards(data) {
+            document.getElementById('current-bri').textContent = data.current_bri ? data.current_bri.toFixed(1) : '--';
+            document.getElementById('mean-bri').textContent = data.mean_bri ? data.mean_bri.toFixed(1) : '--';
+            document.getElementById('correlation').textContent = data.correlation ? data.correlation.toFixed(3) : '--';
+            document.getElementById('trend').textContent = data.trend || '--';
+            document.getElementById('last-updated').textContent = data.last_updated || 'Unknown';
+            
+            // Update additional metrics
+            document.getElementById('std-bri').textContent = data.std_bri ? data.std_bri.toFixed(1) : '--';
+            document.getElementById('r-squared').textContent = data.r_squared ? data.r_squared.toFixed(3) : '--';
+            document.getElementById('data-points').textContent = data.data_points || '--';
+            document.getElementById('min-bri').textContent = data.min_bri ? data.min_bri.toFixed(1) : '--';
+            document.getElementById('max-bri').textContent = data.max_bri ? data.max_bri.toFixed(1) : '--';
+            document.getElementById('volatility').textContent = data.std_bri ? (data.std_bri / data.mean_bri * 100).toFixed(1) + '%' : '--';
+
+            // Update risk level badge
+            const riskLevel = data.risk_level || 'Unknown';
+            const badge = document.getElementById('risk-level-badge');
+            badge.textContent = riskLevel;
+            badge.className = 'badge ' + getRiskClass(riskLevel);
+        }
+
+        // Get risk level CSS class
+        function getRiskClass(riskLevel) {
+            switch(riskLevel.toLowerCase()) {
+                case 'low': return 'bg-success';
+                case 'moderate': return 'bg-warning';
+                case 'high': return 'bg-danger';
+                default: return 'bg-secondary';
+            }
+        }
+
+        // Load BRI chart
+        async function loadBRIChart() {
+            try {
+                const response = await fetch('/api/bri_chart');
+                if (!response.ok) throw new Error('Failed to load BRI chart');
+                
+                const data = await response.json();
+                Plotly.newPlot('bri-chart', data.data, data.layout, {responsive: true});
+                
+            } catch (error) {
+                console.error('Error loading BRI chart:', error);
+                document.getElementById('bri-chart').innerHTML = '<div class="alert alert-danger">Failed to load BRI chart</div>';
+            }
+        }
+
+        // Load risk heatmap
+        async function loadRiskHeatmap() {
+            try {
+                const response = await fetch('/api/risk_heatmap');
+                if (!response.ok) throw new Error('Failed to load risk heatmap');
+                
+                const data = await response.json();
+                Plotly.newPlot('risk-heatmap-chart', data.data, data.layout, {responsive: true});
+                
+            } catch (error) {
+                console.error('Error loading risk heatmap:', error);
+                document.getElementById('risk-heatmap-chart').innerHTML = '<div class="alert alert-danger">Failed to load risk heatmap</div>';
+            }
+        }
+
+        // Load volatility clustering
+        async function loadVolatilityClustering() {
+            try {
+                const response = await fetch('/api/volatility_clustering');
+                if (!response.ok) throw new Error('Failed to load volatility clustering');
+                
+                const data = await response.json();
+                Plotly.newPlot('volatility-chart', data.figure.data, data.figure.layout, {responsive: true});
+                
+            } catch (error) {
+                console.error('Error loading volatility clustering:', error);
+                document.getElementById('volatility-chart').innerHTML = '<div class="alert alert-danger">Failed to load volatility clustering</div>';
+            }
+        }
+
+        // Load early warning system
+        async function loadEarlyWarning() {
+            try {
+                const response = await fetch('/api/early_warning');
+                if (!response.ok) throw new Error('Failed to load early warning system');
+                
+                const data = await response.json();
+                Plotly.newPlot('warning-chart', data.figure.data, data.figure.layout, {responsive: true});
+                
+            } catch (error) {
+                console.error('Error loading early warning system:', error);
+                document.getElementById('warning-chart').innerHTML = '<div class="alert alert-danger">Failed to load early warning system</div>';
+            }
+        }
+
+        // Load forecasting
+        async function loadForecasting() {
+            try {
+                const response = await fetch('/api/confidence_intervals');
+                if (!response.ok) throw new Error('Failed to load forecasting');
+                
+                const data = await response.json();
+                Plotly.newPlot('forecast-chart', data.figure.data, data.figure.layout, {responsive: true});
+                
+            } catch (error) {
+                console.error('Error loading forecasting:', error);
+                document.getElementById('forecast-chart').innerHTML = '<div class="alert alert-danger">Failed to load forecasting</div>';
+            }
+        }
+
+        // Error handling
+        function showError(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>
