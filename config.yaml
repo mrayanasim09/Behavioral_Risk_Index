@@ -24,6 +24,11 @@ data_sources:
   # Reddit Configuration
   reddit:
     enabled: true
+    client_id: "KiGT8yL2ko-ZaWBYbQrwmw"
+    client_secret: "ezQtiCbSJhozM55eq8IC8Ee6qOJglg"
+    user_agent: "BRI-DataCollector/1.0 by mrayanasim09"
+    username: "mrayanasim09"  # Optional
+    password: "your_password_here"  # Optional
     subreddits:
       - "investing"
       - "stocks"
@@ -33,50 +38,30 @@ data_sources:
       - "options"
       - "wallstreetbets"
       - "StockMarket"
-      - "investing"
-      - "SecurityAnalysis"
-      - "ValueInvesting"
-      - "dividends"
-      - "options"
-      - "wallstreetbets"
-      - "StockMarket"
-      - "investing"
-      - "SecurityAnalysis"
-      - "ValueInvesting"
-      - "dividends"
-      - "options"
-      - "wallstreetbets"
-      - "StockMarket"
-      - "investing"
-      - "SecurityAnalysis"
-      - "ValueInvesting"
-      - "dividends"
-      - "options"
-      - "wallstreetbets"
-      - "StockMarket"
-      - "investing"
-      - "SecurityAnalysis"
-      - "ValueInvesting"
-      - "dividends"
-      - "options"
-      - "wallstreetbets"
-      - "StockMarket"
-      - "investing"
-      - "SecurityAnalysis"
-      - "ValueInvesting"
-      - "dividends"
-      - "options"
-      - "wallstreetbets"
-      - "StockMarket"
-      - "investing"
-      - "SecurityAnalysis"
-      - "ValueInvesting"
-      - "dividends"
-      - "options"
-      - "wallstreetbets"
-      - "StockMarket"
+      - "personalfinance"
+      - "financialindependence"
+      - "cryptocurrency"
+      - "bitcoin"
+      - "ethereum"
+      - "cryptomarkets"
+      - "trading"
+      - "daytrading"
+      - "algotrading"
+      - "bogleheads"
+      - "portfolios"
+      - "robinhood"
+      - "tdameritrade"
+      - "fidelity"
+      - "schwab"
+      - "etrade"
+      - "webull"
     post_limit: 100
     comment_limit: 50
+    rate_limit_delay: 0.1  # seconds between requests (100ms)
+    max_retries: 3
+    timeout: 30
+    rate_limit_requests: 1000  # requests per time window
+    rate_limit_window: 600  # seconds (10 minutes)
     
   # Yahoo Finance Configuration
   yahoo_finance:
@@ -154,6 +139,52 @@ analytics:
     n_simulations: 1000
     time_horizon: 30  # days
     confidence_levels: [0.95, 0.99]
+  
+  # BRI Feature Weights
+  feature_weights:
+    sentiment_volatility: 0.2
+    news_tone: 0.15
+    media_herding: 0.15
+    polarity_skew: 0.1
+    event_density: 0.1
+    engagement_index: 0.1
+    fear_index: 0.1
+    overconfidence_index: 0.1
+  
+  # Text Processing Parameters
+  text_processing:
+    min_text_length: 10
+    max_text_length: 512
+    engagement_weight: 2  # Weight for comments in engagement calculation
+  
+  # Rolling Window Parameters
+  rolling_windows:
+    media_herding: 7
+    polarity_skew: 7
+    min_periods: 1
+  
+  # Normalization Parameters
+  normalization:
+    goldstein_scale_min: -10
+    goldstein_scale_max: 10
+    goldstein_norm_min: 0
+    goldstein_norm_max: 1
+    sentiment_normalization_factor: 100  # Divide by 100 for -1 to 1 range
+    bri_clip_min: -3
+    bri_clip_max: 3
+    bri_scale_min: 0
+    bri_scale_max: 100
+  
+  # Data Quality Thresholds
+  data_quality:
+    completeness_threshold: 0.8
+    accuracy_threshold: 0.9
+    consistency_threshold: 0.85
+    timeliness_hours: 24
+    outlier_threshold: 0.05
+    duplicate_threshold: 0.1
+    min_rows: 10
+    min_columns: 3
 
 # Model Configuration
 models:

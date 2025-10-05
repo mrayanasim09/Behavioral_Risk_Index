@@ -1,0 +1,29 @@
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Environments
+.env
+.venv/
+venv/
+
+# Data & Artifacts
+data/raw/**
+output/**
+logs/**
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Docker
+*.log
+

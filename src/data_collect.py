@@ -347,16 +347,16 @@ class DataCollector:
         # Use BigQuery to fetch GDELT data
         news_df = self.fetch_gdelt_financial_events(start_date, end_date, limit=5000)
         
-        if not news_df.empty:
-            # Save news data
-            output_path = f"data/raw/news_{start_date}_{end_date}.csv"
-            ensure_directory(os.path.dirname(output_path))
-            news_df.to_csv(output_path, index=False)
-            
-            return news_df
-        else:
+        # Save whatever we have (API or sample) to raw
+        if news_df.empty:
             self.logger.warning("No GDELT news data collected, using sample data")
-            return self._get_sample_news_data()
+            news_df = self._get_sample_news_data()
+        
+        output_path = f"data/raw/news_{start_date}_{end_date}.csv"
+        ensure_directory(os.path.dirname(output_path))
+        news_df.to_csv(output_path, index=False)
+        self.logger.info(f"Saved news data to {output_path}")
+        return news_df
     
     def collect_reddit_data(self, start_date: str, end_date: str, 
                           subreddits: List[str] = None) -> pd.DataFrame:
@@ -491,7 +491,14 @@ class DataCollector:
             return reddit_df
         else:
             self.logger.warning("No Reddit data collected, using sample data")
-            return self._get_sample_reddit_data()
+            sample_df = self._get_sample_reddit_data()
+            # Ensure minimal schema and save even for sample fallback
+            if not sample_df.empty:
+                output_path = f"data/raw/reddit_{start_date}_{end_date}.csv"
+                ensure_directory(os.path.dirname(output_path))
+                sample_df.to_csv(output_path, index=False)
+                self.logger.info(f"Saved sample Reddit data to {output_path}")
+            return sample_df
     
     def collect_twitter_data(self, start_date: str, end_date: str, 
                            keywords: List[str] = None) -> pd.DataFrame:
@@ -565,6 +572,30 @@ class DataCollector:
         
         self.logger.info("Data collection completed")
         return results
+
+    def collect_vix_data(self, start_date: str, end_date: str) -> pd.DataFrame:
+        """Collect VIX daily close series for validation and comparison.
+
+        Returns a DataFrame with columns: date (datetime64[ns]), vix (float)
+        """
+        try:
+            self.logger.info(f"Fetching VIX data from {start_date} to {end_date}")
+            ticker = yf.Ticker('^VIX')
+            data = ticker.history(start=start_date, end=end_date, auto_adjust=True, back_adjust=True)
+            if data.empty:
+                self.logger.warning("VIX data is empty")
+                return pd.DataFrame(columns=['date', 'vix'])
+
+            vix_df = (
+                data.reset_index()[['Date', 'Close']]
+                    .rename(columns={'Date': 'date', 'Close': 'vix'})
+            )
+            vix_df['date'] = pd.to_datetime(vix_df['date']).dt.normalize()
+            self.logger.info(f"Fetched {len(vix_df)} VIX rows")
+            return vix_df
+        except Exception as e:
+            self.logger.error(f"Error fetching VIX data: {e}")
+            return pd.DataFrame(columns=['date', 'vix'])
     
     def _get_sample_news_data(self) -> pd.DataFrame:
         """Generate sample news data for testing."""

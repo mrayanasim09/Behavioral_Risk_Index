@@ -1,66 +1,73 @@
-# 📚 **BRI Dashboard API Documentation**
+# Behavioral Risk Index (BRI) API Documentation
 
-## 🎯 **Overview**
+## Overview
 
-The Enhanced BRI Dashboard provides a comprehensive REST API for accessing behavioral risk analysis data, advanced analytics, and real-time market insights. This documentation covers all available endpoints, request/response formats, and usage examples.
+The BRI API provides comprehensive endpoints for accessing behavioral risk data, market analysis, and real-time monitoring capabilities. This RESTful API is built with Flask and provides JSON responses for all endpoints.
 
----
-
-## 🔗 **Base URL**
+## Base URL
 
 ```
-Production: https://your-domain.com
-Development: http://localhost:5000
+http://localhost:5000/api
 ```
 
----
+## Authentication
 
-## 📊 **Core Endpoints**
+Currently, the API does not require authentication. For production deployment, consider implementing API key authentication.
 
-### **1. Dashboard Summary**
-Get comprehensive summary statistics and current BRI metrics.
+## Rate Limiting
 
-**Endpoint:** `GET /api/summary`
+- **Rate Limit**: 100 requests per hour per IP
+- **Burst Limit**: 10 requests per minute
+- **Headers**: Rate limit information is included in response headers
+
+## Endpoints
+
+### 1. Summary Data
+
+#### GET `/api/summary`
+
+Returns comprehensive BRI summary statistics and current market state.
 
 **Response:**
 ```json
 {
-  "current_bri": 38.5,
-  "risk_level": "Moderate",
-  "mean_bri": 42.3,
-  "std_bri": 8.7,
-  "min_bri": 15.2,
-  "max_bri": 78.9,
-  "correlation": 0.872,
-  "r_squared": 0.761,
+  "current_bri": 45.2,
+  "mean_bri": 42.1,
+  "std_bri": 8.3,
+  "min_bri": 12.4,
+  "max_bri": 89.7,
+  "risk_level": "Medium",
   "trend": "Rising",
-  "data_points": 1096,
-  "last_updated": "2024-01-15 14:30:25"
+  "last_updated": "2024-01-15 14:30:00",
+  "correlation": -0.194,
+  "r_squared": 0.038,
+  "data_points": 1257
 }
 ```
 
 **Status Codes:**
-- `200 OK` - Success
-- `500 Internal Server Error` - Server error
+- `200 OK`: Success
+- `500 Internal Server Error`: Server error
 
 ---
 
-### **2. BRI Time Series Chart**
-Get interactive BRI time series data with risk-based coloring.
+### 2. BRI Time Series
 
-**Endpoint:** `GET /api/bri_chart`
+#### GET `/api/bri_chart`
+
+Returns BRI time series data with risk-based coloring and moving averages.
 
 **Response:**
 ```json
 {
   "data": [
     {
-      "x": ["2022-01-01", "2022-01-02", ...],
-      "y": [35.2, 38.7, ...],
+      "x": ["2024-01-01", "2024-01-02", ...],
+      "y": [45.2, 47.1, ...],
+      "type": "scatter",
       "mode": "lines+markers",
       "name": "BRI",
-      "line": {"color": "#38A169", "width": 2},
-      "marker": {"size": 4, "color": ["#38A169", "#D69E2E", ...]}
+      "line": {"color": "#38A169", "width": 2}
     }
   ],
   "layout": {
@@ -72,428 +79,472 @@ Get interactive BRI time series data with risk-based coloring.
 }
 ```
 
+**Status Codes:**
+- `200 OK`: Success
+- `500 Internal Server Error`: Server error
+
 ---
 
-## 🔥 **Advanced Analytics Endpoints**
+### 3. Correlation Analysis
 
-### **3. Risk Heatmap**
-Get risk heatmap visualization showing risk levels over time.
+#### GET `/api/correlation`
 
-**Endpoint:** `GET /api/risk_heatmap`
+Returns BRI-VIX correlation data and statistics.
+
+**Response:**
+```json
+{
+  "correlation": -0.194,
+  "r_squared": 0.038,
+  "data_points": 1257,
+  "pearson_p_value": 0.001,
+  "spearman_correlation": -0.187
+}
+```
+
+#### GET `/api/correlation_chart`
+
+Returns scatter plot data for BRI vs VIX correlation analysis.
 
 **Response:**
 ```json
 {
   "data": [
     {
-      "z": [[35.2, 38.7, 42.1], [33.8, 36.4, 39.2], ...],
-      "x": ["Risk Level"],
-      "y": ["2022-01", "2022-02", ...],
-      "type": "heatmap",
-      "colorscale": [[0, "#38A169"], [0.5, "#D69E2E"], [1, "#E53E3E"]]
+      "x": [45.2, 47.1, ...],
+      "y": [18.3, 19.1, ...],
+      "type": "scatter",
+      "mode": "markers",
+      "name": "BRI vs VIX"
     }
   ],
   "layout": {
-    "title": "Risk Heatmap - Monthly BRI Levels",
-    "height": 400
+    "title": "BRI vs VIX Correlation (r = -0.194)",
+    "xaxis": {"title": "Behavioral Risk Index (BRI)"},
+    "yaxis": {"title": "VIX (Volatility Index)"}
   }
 }
 ```
 
 ---
 
-### **4. Volatility Clustering**
-Get volatility clustering analysis with market regime detection.
+### 4. Feature Analysis
 
-**Endpoint:** `GET /api/volatility_clustering`
+#### GET `/api/features`
+
+Returns feature importance and component analysis.
 
 **Response:**
 ```json
 {
-  "figure": {
-    "data": [...],
-    "layout": {...}
-  },
-  "cluster_stats": {
-    "Low Volatility": {
-      "bri_volatility": {"mean": 2.1, "std": 0.8},
-      "bri_abs_change": {"mean": 0.05, "std": 0.02}
-    },
-    "Moderate Volatility": {
-      "bri_volatility": {"mean": 5.3, "std": 1.2},
-      "bri_abs_change": {"mean": 0.12, "std": 0.04}
-    },
-    "High Volatility": {
-      "bri_volatility": {"mean": 12.7, "std": 3.1},
-      "bri_abs_change": {"mean": 0.28, "std": 0.09}
-    }
-  },
-  "cluster_labels": {
-    "Low Volatility": 245,
-    "Moderate Volatility": 678,
-    "High Volatility": 173
-  }
+  "sent_vol": 45.2,
+  "news_tone": 38.7,
+  "herding": 52.1,
+  "polarity_skew": 41.3,
+  "event_density": 35.8
 }
 ```
 
----
+#### GET `/api/feature_chart`
 
-### **5. Early Warning System**
-Get early warning system visualization and spike detection.
-
-**Endpoint:** `GET /api/early_warning`
+Returns feature importance visualization data.
 
 **Response:**
 ```json
 {
-  "figure": {
-    "data": [...],
-    "layout": {...}
-  },
-  "warning_stats": {
-    "total_spikes": 23,
-    "spike_frequency": 2.1,
-    "avg_spike_magnitude": 67.3,
-    "max_spike": 89.2,
-    "recent_spikes": 3
-  },
-  "spike_events": {
-    "2023-03-15": {
-      "BRI": 78.5,
-      "rolling_threshold": 65.2
-    },
-    "2023-10-22": {
-      "BRI": 82.1,
-      "rolling_threshold": 68.7
+  "data": [
+    {
+      "x": ["Sentiment Volatility", "News Tone", "Media Herding", "Polarity Skew", "Event Density"],
+      "y": [45.2, 38.7, 52.1, 41.3, 35.8],
+      "type": "bar",
+      "marker": {"color": ["#2ECC71", "#3498DB", "#E74C3C", "#F1C40F", "#34495E"]}
     }
+  ],
+  "layout": {
+    "title": "Feature Importance (Average Scores)",
+    "xaxis": {"title": "Features"},
+    "yaxis": {"title": "Average Score"}
   }
 }
 ```
 
 ---
 
-### **6. Confidence Intervals & Forecasting**
-Get BRI forecasting with confidence intervals.
+### 5. Distribution Analysis
 
-**Endpoint:** `GET /api/confidence_intervals`
+#### GET `/api/distribution_chart`
+
+Returns BRI distribution histogram data.
 
 **Response:**
 ```json
 {
-  "figure": {
-    "data": [...],
-    "layout": {...}
-  },
-  "predictions": {
-    "2024-01-16": 39.2,
-    "2024-01-17": 41.1,
-    "2024-01-18": 38.7,
-    "2024-01-19": 42.3,
-    "2024-01-20": 40.8,
-    "2024-01-21": 39.5,
-    "2024-01-22": 41.7
-  },
-  "confidence_intervals": {
-    "upper": {
-      "2024-01-16": 45.8,
-      "2024-01-17": 47.2,
-      "2024-01-18": 44.9,
-      "2024-01-19": 48.1,
-      "2024-01-20": 46.5,
-      "2024-01-21": 45.2,
-      "2024-01-22": 47.8
-    },
-    "lower": {
-      "2024-01-16": 32.6,
-      "2024-01-17": 35.0,
-      "2024-01-18": 32.5,
-      "2024-01-19": 36.5,
-      "2024-01-20": 35.1,
-      "2024-01-21": 33.8,
-      "2024-01-22": 35.6
+  "data": [
+    {
+      "x": [12.4, 15.2, 18.1, ...],
+      "type": "histogram",
+      "nbinsx": 30,
+      "marker": {"color": "#3498DB", "opacity": 0.7}
     }
-  },
-  "prediction_accuracy": {
-    "trend_magnitude": 0.15,
-    "confidence_level": 0.95,
-    "prediction_horizon": 7
+  ],
+  "layout": {
+    "title": "BRI Distribution",
+    "xaxis": {"title": "BRI Value"},
+    "yaxis": {"title": "Frequency"}
   }
 }
 ```
 
 ---
 
-### **7. Comprehensive Analytics Summary**
-Get all advanced analytics in a single request.
+### 6. Advanced Analytics
 
-**Endpoint:** `GET /api/analytics_summary`
+#### GET `/api/box_plots`
+
+Returns box plot analysis for BRI components.
 
 **Response:**
 ```json
 {
-  "risk_heatmap": {...},
-  "volatility_clustering": {...},
-  "early_warning": {...},
-  "confidence_intervals": {...}
+  "data": [
+    {
+      "y": [45.2, 47.1, ...],
+      "type": "box",
+      "name": "BRI Distribution",
+      "boxpoints": "outliers"
+    }
+  ],
+  "layout": {
+    "title": "Feature Distribution Analysis",
+    "yaxis": {"title": "Score"}
+  }
+}
+```
+
+#### GET `/api/violin_plots`
+
+Returns violin plot analysis for BRI distribution.
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "y": [45.2, 47.1, ...],
+      "type": "violin",
+      "name": "BRI Distribution",
+      "box_visible": true,
+      "meanline_visible": true
+    }
+  ],
+  "layout": {
+    "title": "BRI Distribution (Violin Plot)",
+    "yaxis": {"title": "BRI Value"}
+  }
 }
 ```
 
 ---
 
-## 🛠️ **Usage Examples**
+### 7. Forecasting
 
-### **JavaScript/Fetch API**
-```javascript
-// Get summary statistics
-async function getSummary() {
-  try {
-    const response = await fetch('/api/summary');
-    const data = await response.json();
-    console.log('Current BRI:', data.current_bri);
-    console.log('Risk Level:', data.risk_level);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
+#### GET `/api/forecasting_comparison`
 
-// Get risk heatmap
-async function getRiskHeatmap() {
-  try {
-    const response = await fetch('/api/risk_heatmap');
-    const data = await response.json();
-    Plotly.newPlot('heatmap-container', data.data, data.layout);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
+Returns forecasting comparison data with confidence intervals.
 
-// Get early warning alerts
-async function getEarlyWarning() {
-  try {
-    const response = await fetch('/api/early_warning');
-    const data = await response.json();
-    
-    if (data.warning_stats.recent_spikes > 0) {
-      alert(`Warning: ${data.warning_stats.recent_spikes} recent risk spikes detected!`);
+**Response:**
+```json
+{
+  "data": [
+    {
+      "x": ["2024-01-01", "2024-01-02", ...],
+      "y": [45.2, 47.1, ...],
+      "type": "scatter",
+      "mode": "lines",
+      "name": "Actual BRI"
+    },
+    {
+      "x": ["2024-01-15", "2024-01-16", ...],
+      "y": [48.1, 49.3, ...],
+      "type": "scatter",
+      "mode": "lines",
+      "name": "Forecast",
+      "line": {"dash": "dash"}
     }
-  } catch (error) {
-    console.error('Error:', error);
+  ],
+  "layout": {
+    "title": "BRI Forecasting Comparison",
+    "xaxis": {"title": "Date"},
+    "yaxis": {"title": "BRI Value"}
   }
 }
 ```
 
-### **Python/Requests**
+#### GET `/api/confidence_intervals`
+
+Returns confidence interval analysis for BRI predictions.
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "x": ["2024-01-01", "2024-01-02", ...],
+      "y": [45.2, 47.1, ...],
+      "type": "scatter",
+      "mode": "lines",
+      "name": "BRI"
+    },
+    {
+      "x": ["2024-01-01", "2024-01-02", ...],
+      "y": [52.1, 54.3, ...],
+      "type": "scatter",
+      "mode": "lines",
+      "name": "Upper 95% CI",
+      "fill": "tonexty"
+    }
+  ],
+  "layout": {
+    "title": "BRI with 95% Confidence Intervals",
+    "xaxis": {"title": "Date"},
+    "yaxis": {"title": "BRI Value"}
+  }
+}
+```
+
+---
+
+### 8. Model Performance
+
+#### GET `/api/model_performance`
+
+Returns model performance comparison data.
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "x": ["Random Forest", "XGBoost", "LSTM", "ARIMA"],
+      "y": [0.789, 0.812, 0.756, 0.698],
+      "type": "bar",
+      "name": "R² Score",
+      "marker": {"color": "#3182CE"}
+    }
+  ],
+  "layout": {
+    "title": "Model Performance Comparison",
+    "xaxis": {"title": "Model"},
+    "yaxis": {"title": "Score"}
+  }
+}
+```
+
+---
+
+### 9. Risk Analysis
+
+#### GET `/api/risk_heatmap`
+
+Returns risk heatmap data for temporal risk analysis.
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "z": [[45.2, 47.1], [48.3, 46.8], ...],
+      "type": "heatmap",
+      "colorscale": [[0, "#38A169"], [0.5, "#D69E2E"], [1, "#E53E3E"]],
+      "showscale": true
+    }
+  ],
+  "layout": {
+    "title": "BRI Risk Heatmap",
+    "xaxis": {"title": "Risk Categories"},
+    "yaxis": {"title": "Time Period"}
+  }
+}
+```
+
+#### GET `/api/early_warning`
+
+Returns early warning system data with risk thresholds.
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "x": ["2024-01-01", "2024-01-02", ...],
+      "y": [45.2, 47.1, ...],
+      "type": "scatter",
+      "mode": "lines",
+      "name": "BRI"
+    },
+    {
+      "x": ["2024-01-01", "2024-01-02", ...],
+      "y": [75.0, 75.0, ...],
+      "type": "scatter",
+      "mode": "lines",
+      "name": "High Risk Threshold",
+      "line": {"dash": "dash"}
+    }
+  ],
+  "layout": {
+    "title": "BRI Early Warning System",
+    "xaxis": {"title": "Date"},
+    "yaxis": {"title": "BRI Level"}
+  }
+}
+```
+
+---
+
+### 10. Statistical Validation
+
+#### GET `/api/statistical_validation_report`
+
+Returns statistical validation results.
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "x": ["Correlation", "Stationarity", "Granger Causality", "Normality", "Heteroskedasticity"],
+      "y": [0.001, 0.012, 0.0001, 0.0004, 0.0012],
+      "type": "bar",
+      "marker": {"color": ["#38A169", "#D69E2E", "#38A169", "#38A169", "#38A169"]}
+    }
+  ],
+  "layout": {
+    "title": "Statistical Validation Results",
+    "xaxis": {"title": "Statistical Test"},
+    "yaxis": {"title": "P-Value"}
+  }
+}
+```
+
+---
+
+## Error Handling
+
+### Standard Error Response
+
+```json
+{
+  "error": "Error message",
+  "code": "ERROR_CODE",
+  "timestamp": "2024-01-15T14:30:00Z"
+}
+```
+
+### Common Error Codes
+
+- `INVALID_REQUEST`: Invalid request parameters
+- `DATA_NOT_FOUND`: Requested data not available
+- `PROCESSING_ERROR`: Error during data processing
+- `RATE_LIMIT_EXCEEDED`: Rate limit exceeded
+- `SERVER_ERROR`: Internal server error
+
+---
+
+## Rate Limiting
+
+### Headers
+
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1642248600
+```
+
+### Status Codes
+
+- `429 Too Many Requests`: Rate limit exceeded
+- `503 Service Unavailable`: Service temporarily unavailable
+
+---
+
+## Data Formats
+
+### Date Format
+All dates are returned in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`
+
+### Number Format
+- BRI values: 0-100 scale
+- Correlations: -1.0 to 1.0
+- Percentages: 0.0 to 100.0
+
+### Risk Levels
+- `Low`: 0-30
+- `Medium`: 30-60
+- `High`: 60-100
+
+---
+
+## Examples
+
+### Python Client
+
 ```python
 import requests
 import json
 
-# Get summary statistics
-def get_summary():
-    response = requests.get('http://localhost:5000/api/summary')
-    if response.status_code == 200:
-        data = response.json()
-        print(f"Current BRI: {data['current_bri']}")
-        print(f"Risk Level: {data['risk_level']}")
-        return data
-    else:
-        print(f"Error: {response.status_code}")
-        return None
+# Get BRI summary
+response = requests.get('http://localhost:5000/api/summary')
+data = response.json()
+print(f"Current BRI: {data['current_bri']}")
 
-# Get volatility clustering
-def get_volatility_clustering():
-    response = requests.get('http://localhost:5000/api/volatility_clustering')
-    if response.status_code == 200:
-        data = response.json()
-        print(f"Cluster distribution: {data['cluster_labels']}")
-        return data
-    else:
-        print(f"Error: {response.status_code}")
-        return None
-
-# Get forecasting predictions
-def get_forecast():
-    response = requests.get('http://localhost:5000/api/confidence_intervals')
-    if response.status_code == 200:
-        data = response.json()
-        print("7-day BRI forecast:")
-        for date, prediction in data['predictions'].items():
-            print(f"{date}: {prediction:.1f}")
-        return data
-    else:
-        print(f"Error: {response.status_code}")
-        return None
+# Get correlation data
+response = requests.get('http://localhost:5000/api/correlation')
+correlation = response.json()
+print(f"BRI-VIX Correlation: {correlation['correlation']}")
 ```
 
-### **cURL Examples**
-```bash
-# Get summary statistics
-curl -X GET http://localhost:5000/api/summary
+### JavaScript Client
 
-# Get risk heatmap
-curl -X GET http://localhost:5000/api/risk_heatmap
+```javascript
+// Get BRI summary
+fetch('/api/summary')
+  .then(response => response.json())
+  .then(data => {
+    console.log(`Current BRI: ${data.current_bri}`);
+  });
 
-# Get early warning system
-curl -X GET http://localhost:5000/api/early_warning
-
-# Get comprehensive analytics
-curl -X GET http://localhost:5000/api/analytics_summary
+// Get correlation data
+fetch('/api/correlation')
+  .then(response => response.json())
+  .then(data => {
+    console.log(`BRI-VIX Correlation: ${data.correlation}`);
+  });
 ```
 
 ---
 
-## 📈 **Data Models**
+## Changelog
 
-### **BRI Data Structure**
-```json
-{
-  "date": "2024-01-15",
-  "BRI": 38.5,
-  "sentiment_volatility": 0.15,
-  "media_herding": 0.23,
-  "news_tone": 0.42,
-  "event_density": 0.18,
-  "polarity_skew": 0.12
-}
-```
+### Version 2.0.0 (2024-01-15)
+- Added comprehensive API documentation
+- Enhanced error handling
+- Added rate limiting
+- Improved response formats
 
-### **Risk Level Classification**
-```json
-{
-  "low": {
-    "threshold": 30,
-    "description": "Stable market conditions, low behavioral risk",
-    "color": "#38A169"
-  },
-  "moderate": {
-    "threshold": 60,
-    "description": "Normal market volatility, moderate risk",
-    "color": "#D69E2E"
-  },
-  "high": {
-    "threshold": 100,
-    "description": "Elevated stress, high behavioral risk",
-    "color": "#E53E3E"
-  }
-}
-```
+### Version 1.0.0 (2024-01-01)
+- Initial API release
+- Basic BRI endpoints
+- Chart data endpoints
 
 ---
 
-## ⚠️ **Error Handling**
-
-### **Error Response Format**
-```json
-{
-  "error": "Error message description",
-  "code": "ERROR_CODE",
-  "timestamp": "2024-01-15T14:30:25Z"
-}
-```
-
-### **Common Error Codes**
-- `400 Bad Request` - Invalid request parameters
-- `404 Not Found` - Endpoint or resource not found
-- `500 Internal Server Error` - Server-side error
-- `503 Service Unavailable` - Service temporarily unavailable
-
----
-
-## 🔒 **Rate Limiting**
-
-- **Rate Limit:** 100 requests per hour per IP
-- **Headers:** 
-  - `X-RateLimit-Limit`: 100
-  - `X-RateLimit-Remaining`: 95
-  - `X-RateLimit-Reset`: 1642248625
-
----
-
-## 📊 **Response Times**
-
-| Endpoint | Average Response Time | 95th Percentile |
-|----------|----------------------|-----------------|
-| `/api/summary` | 50ms | 100ms |
-| `/api/bri_chart` | 200ms | 400ms |
-| `/api/risk_heatmap` | 300ms | 600ms |
-| `/api/volatility_clustering` | 500ms | 1000ms |
-| `/api/early_warning` | 400ms | 800ms |
-| `/api/confidence_intervals` | 600ms | 1200ms |
-| `/api/analytics_summary` | 1500ms | 3000ms |
-
----
-
-## 🚀 **Best Practices**
-
-### **1. Caching**
-- Cache responses for 5 minutes to reduce server load
-- Use ETags for conditional requests
-- Implement client-side caching for static data
-
-### **2. Error Handling**
-- Always check response status codes
-- Implement exponential backoff for retries
-- Handle network timeouts gracefully
-
-### **3. Performance**
-- Use pagination for large datasets
-- Request only needed data fields
-- Implement request debouncing for real-time updates
-
-### **4. Security**
-- Validate all input parameters
-- Use HTTPS in production
-- Implement API key authentication for sensitive endpoints
-
----
-
-## 🔄 **Webhook Integration**
-
-### **Webhook Configuration**
-```json
-{
-  "url": "https://your-app.com/webhook/bri-alerts",
-  "events": ["risk_spike", "threshold_breach", "anomaly_detected"],
-  "secret": "your-webhook-secret"
-}
-```
-
-### **Webhook Payload**
-```json
-{
-  "event": "risk_spike",
-  "timestamp": "2024-01-15T14:30:25Z",
-  "data": {
-    "bri_value": 78.5,
-    "threshold": 65.2,
-    "risk_level": "High",
-    "spike_magnitude": 13.3
-  }
-}
-```
-
----
-
-## 📞 **Support**
+## Support
 
 For API support and questions:
-- **Documentation:** [GitHub Repository](https://github.com/your-repo/bri-dashboard)
-- **Issues:** [GitHub Issues](https://github.com/your-repo/bri-dashboard/issues)
-- **Email:** support@your-domain.com
+- **Documentation**: [GitHub Repository](https://github.com/mrayanasim09/Behavioral_Risk_Index)
+- **Issues**: [GitHub Issues](https://github.com/mrayanasim09/Behavioral_Risk_Index/issues)
+- **Email**: [Your Email]
 
 ---
 
-## 📝 **Changelog**
-
-### **Version 2.0.0** (Current)
-- ✅ Added advanced analytics endpoints
-- ✅ Implemented risk heatmap visualization
-- ✅ Added volatility clustering analysis
-- ✅ Created early warning system
-- ✅ Added confidence intervals and forecasting
-- ✅ Enhanced error handling and documentation
-
-### **Version 1.0.0**
-- ✅ Basic BRI calculation and visualization
-- ✅ Summary statistics endpoint
-- ✅ Time series chart endpoint
-- ✅ Professional dashboard interface
+*Last Updated: January 15, 2024*

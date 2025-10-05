@@ -1,0 +1,171 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "BRI Monitoring Dashboard",
+    "tags": ["bri", "monitoring"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "BRI Value Over Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "bri_value",
+            "legendFormat": "BRI Value"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "BRI Value",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "System Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"bri-app\"}",
+            "legendFormat": "Application Status"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(bri_http_requests_total{status=~\"5..\"}[5m])",
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 18,
+          "y": 0
+        }
+      },
+      {
+        "id": 4,
+        "title": "Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(bri_http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th Percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(bri_http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "50th Percentile"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 4
+        }
+      },
+      {
+        "id": 5,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100",
+            "legendFormat": "Memory Usage %"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 6,
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU Usage %"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 6,
+          "y": 8
+        }
+      },
+      {
+        "id": 7,
+        "title": "Data Collection Status",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "bri_data_collection_success_total",
+            "legendFormat": "Success"
+          },
+          {
+            "expr": "bri_data_collection_errors_total",
+            "legendFormat": "Errors"
+          }
+        ],
+        "gridPos": {
+          "h": 6,
+          "w": 12,
+          "x": 0,
+          "y": 12
+        }
+      },
+      {
+        "id": 8,
+        "title": "API Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "bri_reddit_api_health",
+            "legendFormat": "Reddit API"
+          },
+          {
+            "expr": "bri_gdelt_api_health",
+            "legendFormat": "GDELT API"
+          }
+        ],
+        "gridPos": {
+          "h": 6,
+          "w": 12,
+          "x": 12,
+          "y": 12
+        }
+      }
+    ]
+  }
+}
