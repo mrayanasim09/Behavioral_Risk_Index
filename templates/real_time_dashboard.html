@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time BRI Dashboard - Live Behavioral Risk Index</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1A365D;
+            --secondary: #2D3748;
+            --accent: #C53030;
+            --background: #F7FAFC;
+            --card-bg: #FFFFFF;
+            --text-primary: #1A202C;
+            --text-secondary: #4A5568;
+            --border: #E2E8F0;
+            --shadow: rgba(26, 32, 44, 0.1);
+            --risk-low: #38A169;
+            --risk-moderate: #D69E2E;
+            --risk-high: #E53E3E;
+            --live-indicator: #E53E3E;
+        }
+        
+        [data-theme="dark"] {
+            --primary: #2B6CB0;
+            --secondary: #4A5568;
+            --accent: #FC8181;
+            --background: #0F1419;
+            --card-bg: #1A202C;
+            --text-primary: #F7FAFC;
+            --text-secondary: #A0AEC0;
+            --border: #2D3748;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --risk-low: #68D391;
+            --risk-moderate: #F6E05E;
+            --risk-high: #FC8181;
+            --live-indicator: #FC8181;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--live-indicator);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .risk-low { color: var(--risk-low); }
+        .risk-moderate { color: var(--risk-moderate); }
+        .risk-high { color: var(--risk-high); }
+        
+        .chart-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .status-bar {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--live-indicator);
+        }
+        
+        .btn-live {
+            background: linear-gradient(135deg, var(--accent) 0%, #E53E3E 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-live:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--border);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line me-2"></i>
+                Real-Time BRI Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="live-indicator"></span>
+                <span class="navbar-text me-3" id="liveStatus">Live Data</span>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-1">
+                        <span class="live-indicator"></span>
+                        Real-Time Behavioral Risk Index
+                    </h5>
+                    <p class="mb-0 text-muted" id="lastUpdate">Last updated: Never</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-live" onclick="forceUpdate()">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        Force Update
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value risk-high" id="currentBRI">--</div>
+                    <div class="metric-label">Current BRI</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="riskLevel">--</div>
+                    <div class="metric-label">Risk Level</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="trend">--</div>
+                    <div class="metric-label">Trend</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="dataPoints">--</div>
+                    <div class="metric-label">Data Points</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chart -->
+        <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Real-Time BRI Time Series</h5>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshChart()">
+                        <i class="fas fa-refresh me-1"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            <div id="briChart" style="height: 500px;">
+                <div class="loading-spinner" id="briLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading BRI chart...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Metrics -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Live Data Status</h6>
+                        <div id="liveStatusDetails">
+                            <p><strong>Status:</strong> <span id="isLive">Checking...</span></p>
+                            <p><strong>Update Interval:</strong> <span id="updateInterval">--</span> minutes</p>
+                            <p><strong>Last Update:</strong> <span id="lastUpdateTime">--</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">System Information</h6>
+                        <div id="systemInfo">
+                            <p><strong>Data Source:</strong> Real-time + Historical</p>
+                            <p><strong>Update Frequency:</strong> Every 5 minutes</p>
+                            <p><strong>Data Range:</strong> <span id="dataRange">--</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let chartData = null;
+        let updateInterval = null;
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            startAutoRefresh();
+        });
+        
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Load summary data
+                const summaryResponse = await fetch('/api/summary');
+                const summary = await summaryResponse.json();
+                
+                // Update metrics
+                document.getElementById('currentBRI').textContent = summary.current_bri?.toFixed(2) || '--';
+                document.getElementById('riskLevel').textContent = summary.risk_level || '--';
+                document.getElementById('trend').textContent = summary.trend || '--';
+                document.getElementById('dataPoints').textContent = summary.data_points?.toLocaleString() || '--';
+                document.getElementById('lastUpdate').textContent = `Last updated: ${summary.last_updated || 'Never'}`;
+                
+                // Update risk level color
+                const riskLevelEl = document.getElementById('riskLevel');
+                riskLevelEl.className = `metric-value risk-${summary.risk_level?.toLowerCase() || 'moderate'}`;
+                
+                // Load chart
+                await loadBRIChart();
+                
+                // Load live status
+                await loadLiveStatus();
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+        
+        // Load BRI chart
+        async function loadBRIChart() {
+            const loadingEl = document.getElementById('briLoading');
+            loadingEl.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/bri_chart');
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Hide loading spinner
+                loadingEl.style.display = 'none';
+                
+                // Render chart
+                Plotly.newPlot('briChart', data.data, data.layout, {
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
+                });
+                
+            } catch (error) {
+                console.error('Error loading BRI chart:', error);
+                loadingEl.innerHTML = '<p class="text-danger">Error loading chart</p>';
+            }
+        }
+        
+        // Load live status
+        async function loadLiveStatus() {
+            try {
+                const response = await fetch('/api/live_status');
+                const status = await response.json();
+                
+                document.getElementById('isLive').textContent = status.is_live ? 'Live' : 'Offline';
+                document.getElementById('updateInterval').textContent = status.update_interval || '--';
+                document.getElementById('lastUpdateTime').textContent = status.last_update || '--';
+                document.getElementById('dataRange').textContent = `${status.data_points || 0} points`;
+                
+            } catch (error) {
+                console.error('Error loading live status:', error);
+            }
+        }
+        
+        // Force update
+        async function forceUpdate() {
+            try {
+                const response = await fetch('/api/force_update');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Reload dashboard
+                    await loadDashboard();
+                    
+                    // Show success message
+                    const btn = event.target;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check me-2"></i>Updated!';
+                    btn.classList.add('btn-success');
+                    btn.classList.remove('btn-live');
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-live');
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Error forcing update:', error);
+            }
+        }
+        
+        // Refresh chart
+        function refreshChart() {
+            loadBRIChart();
+        }
+        
+        // Start auto-refresh
+        function startAutoRefresh() {
+            // Refresh every 30 seconds
+            updateInterval = setInterval(() => {
+                loadDashboard();
+            }, 30000);
+        }
+        
+        // Toggle theme
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeIcon.className = 'fas fa-moon';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+            }
+            
+            // Refresh chart with new theme
+            loadBRIChart();
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        });
+    </script>
+</body>
+</html>
