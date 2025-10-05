@@ -11,36 +11,53 @@
     <style>
         /* Professional Color Scheme */
         :root {
-            /* Light Mode Colors */
-            --primary: #2ECC71;
-            --secondary: #3498DB;
-            --accent: #E74C3C;
-            --background: #F8F9FA;
+            /* Light Mode Colors - More Sophisticated */
+            --primary: #1A365D;
+            --secondary: #2D3748;
+            --accent: #C53030;
+            --background: #F7FAFC;
             --card-bg: #FFFFFF;
-            --text-primary: #2C3E50;
-            --text-secondary: #7F8C8D;
-            --border: #E9ECEF;
-            --shadow: rgba(44, 62, 80, 0.1);
+            --text-primary: #1A202C;
+            --text-secondary: #4A5568;
+            --border: #E2E8F0;
+            --shadow: rgba(26, 32, 44, 0.1);
             
-            /* Risk Colors */
-            --risk-low: #2ECC71;
-            --risk-moderate: #F1C40F;
-            --risk-high: #E74C3C;
-            --vix-overlay: #34495E;
-            --moving-avg: #3498DB;
+            /* Risk Colors - More Professional */
+            --risk-low: #38A169;
+            --risk-moderate: #D69E2E;
+            --risk-high: #E53E3E;
+            --vix-overlay: #2D3748;
+            --moving-avg: #3182CE;
+            
+            /* Chart Colors */
+            --chart-bg: #FFFFFF;
+            --chart-grid: #E2E8F0;
+            --chart-text: #1A202C;
         }
         
-        /* Dark Mode Colors */
+        /* Dark Mode Colors - Professional Dark Theme */
         [data-theme="dark"] {
-            --primary: #2ECC71;
-            --secondary: #3498DB;
-            --accent: #E74C3C;
-            --background: #1A1A1A;
-            --card-bg: #2D2D2D;
-            --text-primary: #ECF0F1;
-            --text-secondary: #BDC3C7;
-            --border: #404040;
-            --shadow: rgba(0, 0, 0, 0.3);
+            --primary: #2B6CB0;
+            --secondary: #4A5568;
+            --accent: #FC8181;
+            --background: #0F1419;
+            --card-bg: #1A202C;
+            --text-primary: #F7FAFC;
+            --text-secondary: #A0AEC0;
+            --border: #2D3748;
+            --shadow: rgba(0, 0, 0, 0.4);
+            
+            /* Risk Colors - Dark Mode */
+            --risk-low: #68D391;
+            --risk-moderate: #F6E05E;
+            --risk-high: #FC8181;
+            --vix-overlay: #4A5568;
+            --moving-avg: #63B3ED;
+            
+            /* Chart Colors - Dark Mode */
+            --chart-bg: #1A202C;
+            --chart-grid: #2D3748;
+            --chart-text: #F7FAFC;
         }
         
         body {
@@ -224,6 +241,9 @@
                     <div class="mt-2">
                         <span class="badge" id="risk-level-badge">Loading...</span>
                     </div>
+                    <div class="mt-2">
+                        <small class="text-muted">Real-time behavioral risk</small>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">
@@ -232,6 +252,9 @@
                     <div class="metric-label">Mean BRI</div>
                     <div class="mt-2">
                         <small class="text-muted">Historical Average</small>
+                    </div>
+                    <div class="mt-1">
+                        <small class="text-muted">±<span id="std-bri">--</span> std dev</small>
                     </div>
                 </div>
             </div>
@@ -242,6 +265,9 @@
                     <div class="mt-2">
                         <small class="text-muted">Market Relationship</small>
                     </div>
+                    <div class="mt-1">
+                        <small class="text-muted">R² = <span id="r-squared">--</span></small>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">
@@ -250,6 +276,40 @@
                     <div class="metric-label">Trend</div>
                     <div class="mt-2">
                         <small class="text-muted">30-Day Direction</small>
+                    </div>
+                    <div class="mt-1">
+                        <small class="text-muted">Data points: <span id="data-points">--</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics Row -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card metric-card">
+                    <div class="metric-value" id="min-bri">--</div>
+                    <div class="metric-label">Minimum BRI</div>
+                    <div class="mt-2">
+                        <small class="text-muted">Lowest risk period</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card metric-card">
+                    <div class="metric-value" id="max-bri">--</div>
+                    <div class="metric-label">Maximum BRI</div>
+                    <div class="mt-2">
+                        <small class="text-muted">Highest risk period</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card metric-card">
+                    <div class="metric-value" id="volatility">--</div>
+                    <div class="metric-label">BRI Volatility</div>
+                    <div class="mt-2">
+                        <small class="text-muted">Risk stability measure</small>
                     </div>
                 </div>
             </div>
@@ -343,6 +403,58 @@
             </div>
         </div>
 
+        <!-- Information Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i>
+                            About the Behavioral Risk Index (BRI)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-chart-line text-primary"></i> What is BRI?</h6>
+                                <p class="text-muted">
+                                    The Behavioral Risk Index is a composite measure that quantifies market behavioral instability 
+                                    by analyzing sentiment volatility, news tone, media herding, and event density. It ranges from 0-100, 
+                                    where higher values indicate increased market stress and behavioral risk.
+                                </p>
+                                
+                                <h6><i class="fas fa-cogs text-secondary"></i> How is BRI Calculated?</h6>
+                                <p class="text-muted">
+                                    BRI combines five key behavioral indicators:
+                                    <br>• <strong>Sentiment Volatility (30%)</strong> - Panic/fear proxy from social media
+                                    <br>• <strong>Media Herding (20%)</strong> - Herding intensity in news coverage
+                                    <br>• <strong>News Tone (20%)</strong> - Optimism/pessimism in financial news
+                                    <br>• <strong>Event Density (20%)</strong> - Frequency of major market events
+                                    <br>• <strong>Polarity Skew (10%)</strong> - Cognitive bias measure
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-shield-alt text-accent"></i> Risk Levels</h6>
+                                <p class="text-muted">
+                                    <span class="badge bg-success me-2">Low (0-30)</span> Stable market conditions, low behavioral risk
+                                    <br><span class="badge bg-warning me-2">Moderate (30-60)</span> Normal market volatility, moderate risk
+                                    <br><span class="badge bg-danger me-2">High (60-100)</span> Elevated stress, high behavioral risk
+                                </p>
+                                
+                                <h6><i class="fas fa-chart-bar text-primary"></i> Data Sources</h6>
+                                <p class="text-muted">
+                                    • <strong>GDELT</strong> - Global news events and sentiment analysis
+                                    <br>• <strong>Reddit/Twitter</strong> - Social media sentiment and engagement
+                                    <br>• <strong>Yahoo Finance</strong> - Market data and VIX correlation
+                                    <br>• <strong>FinBERT</strong> - Advanced financial sentiment analysis
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <div class="row">
             <div class="col-12">
@@ -354,6 +466,9 @@
                         </p>
                         <p class="mb-0 text-muted">
                             Behavioral Risk Index - A comprehensive measure of market behavioral risk patterns
+                        </p>
+                        <p class="mb-0 text-muted">
+                            <small>Data updated every 5 minutes | Auto-refresh enabled</small>
                         </p>
                     </div>
                 </div>
@@ -436,6 +551,14 @@
             document.getElementById('correlation').textContent = data.correlation ? data.correlation.toFixed(3) : '--';
             document.getElementById('trend').textContent = data.trend || '--';
             document.getElementById('last-updated').textContent = data.last_updated || 'Unknown';
+            
+            // Update additional metrics
+            document.getElementById('std-bri').textContent = data.std_bri ? data.std_bri.toFixed(1) : '--';
+            document.getElementById('r-squared').textContent = data.r_squared ? data.r_squared.toFixed(3) : '--';
+            document.getElementById('data-points').textContent = data.data_points || '--';
+            document.getElementById('min-bri').textContent = data.min_bri ? data.min_bri.toFixed(1) : '--';
+            document.getElementById('max-bri').textContent = data.max_bri ? data.max_bri.toFixed(1) : '--';
+            document.getElementById('volatility').textContent = data.std_bri ? (data.std_bri / data.mean_bri * 100).toFixed(1) + '%' : '--';
 
             // Update risk level badge
             const riskLevel = data.risk_level || 'Unknown';

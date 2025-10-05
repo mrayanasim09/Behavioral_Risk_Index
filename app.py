@@ -26,6 +26,17 @@ def clean_for_json(data):
     else:
         return data
 
+def get_chart_theme():
+    """Get chart theme colors based on current theme"""
+    # For now, we'll use light theme colors
+    # In a real implementation, you'd detect the user's theme preference
+    return {
+        'bg_color': '#FFFFFF',
+        'grid_color': '#E2E8F0',
+        'text_color': '#1A202C',
+        'paper_bg': '#FFFFFF'
+    }
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -216,22 +227,22 @@ def api_bri_chart():
     bri_values = clean_for_json(analyzer.bri_data['BRI']).tolist()
     bri_dates = clean_for_json(analyzer.bri_data['date']).tolist()
     
-    # Create color array based on risk levels
+    # Create color array based on risk levels - Professional colors
     colors = []
     for val in bri_values:
         if val < 30:
-            colors.append('#2ECC71')  # Low Risk - Green
+            colors.append('#38A169')  # Low Risk - Professional Green
         elif val < 60:
-            colors.append('#F1C40F')  # Moderate Risk - Yellow
+            colors.append('#D69E2E')  # Moderate Risk - Professional Yellow
         else:
-            colors.append('#E74C3C')  # High Risk - Red
+            colors.append('#E53E3E')  # High Risk - Professional Red
     
     fig.add_trace(go.Scatter(
         x=bri_dates,
         y=bri_values,
         mode='lines+markers',
         name='BRI',
-        line=dict(color='#2ECC71', width=2),
+        line=dict(color='#38A169', width=2),
         marker=dict(size=4, color=colors)
     ))
     
@@ -246,34 +257,35 @@ def api_bri_chart():
         y=clean_for_json(smooth_data).tolist(),
         mode='lines',
         name='7-Day MA',
-        line=dict(color='#3498DB', width=3)  # Moving Average - Blue
+        line=dict(color='#3182CE', width=3)  # Moving Average - Professional Blue
     ))
     
     # Add risk thresholds
     mean_bri = analyzer.bri_data['BRI'].mean()
     std_bri = analyzer.bri_data['BRI'].std()
     
-    fig.add_hline(y=mean_bri, line_dash="dash", line_color="#34495E", 
+    fig.add_hline(y=mean_bri, line_dash="dash", line_color="#2D3748", 
                   annotation_text=f"Mean: {mean_bri:.1f}")
-    fig.add_hline(y=mean_bri + std_bri, line_dash="dash", line_color="#E74C3C", 
+    fig.add_hline(y=mean_bri + std_bri, line_dash="dash", line_color="#E53E3E", 
                   annotation_text=f"+1σ: {mean_bri + std_bri:.1f}")
-    fig.add_hline(y=mean_bri - std_bri, line_dash="dash", line_color="#E74C3C", 
+    fig.add_hline(y=mean_bri - std_bri, line_dash="dash", line_color="#E53E3E", 
                   annotation_text=f"-1σ: {mean_bri - std_bri:.1f}")
     
+    theme = get_chart_theme()
     fig.update_layout(
         title=dict(
             text='Behavioral Risk Index (BRI) Over Time',
-            font=dict(color='#2C3E50', size=18, family='Inter')
+            font=dict(color=theme['text_color'], size=18, family='Inter')
         ),
         xaxis_title='Date',
         yaxis_title='BRI (0-100)',
         hovermode='x unified',
         height=500,
-        plot_bgcolor='#FFFFFF',
-        paper_bgcolor='#FFFFFF',
-        font=dict(color='#2C3E50', family='Inter'),
-        xaxis=dict(gridcolor='#E9ECEF'),
-        yaxis=dict(gridcolor='#E9ECEF')
+        plot_bgcolor=theme['bg_color'],
+        paper_bgcolor=theme['paper_bg'],
+        font=dict(color=theme['text_color'], family='Inter'),
+        xaxis=dict(gridcolor=theme['grid_color']),
+        yaxis=dict(gridcolor=theme['grid_color'])
     )
     
     return jsonify(fig.to_dict())
@@ -304,7 +316,7 @@ def api_correlation_chart():
         marker=dict(
             size=8,
             color=list(range(len(merged))),
-            colorscale=[[0, '#2ECC71'], [0.5, '#F1C40F'], [1, '#E74C3C']],
+            colorscale=[[0, '#38A169'], [0.5, '#D69E2E'], [1, '#E53E3E']],
             showscale=True,
             colorbar=dict(title="Time Index", tickfont=dict(color='#2C3E50', family='Inter'))
         )
@@ -321,7 +333,7 @@ def api_correlation_chart():
         y=y_pred.tolist(),
         mode='lines',
         name='Regression Line',
-        line=dict(color='#34495E', width=3)  # VIX Overlay - Dark Gray
+        line=dict(color='#2D3748', width=3)  # VIX Overlay - Professional Dark Gray
     ))
     
     correlation = merged['BRI'].corr(merged['Close_^VIX'])
