@@ -179,7 +179,10 @@ def index():
 @app.route('/api/summary')
 def api_summary():
     """API endpoint for BRI summary"""
-    return jsonify(analyzer.get_bri_summary())
+    summary = analyzer.get_bri_summary()
+    correlation_data = analyzer.get_correlation_data()
+    summary.update(correlation_data)
+    return jsonify(summary)
 
 @app.route('/api/correlation')
 def api_correlation():
@@ -202,8 +205,8 @@ def api_bri_chart():
     
     # Add BRI line
     fig.add_trace(go.Scatter(
-        x=analyzer.bri_data['date'],
-        y=analyzer.bri_data['BRI'],
+        x=analyzer.bri_data['date'].tolist(),
+        y=analyzer.bri_data['BRI'].tolist(),
         mode='lines',
         name='BRI',
         line=dict(color='blue', width=2)
@@ -212,8 +215,8 @@ def api_bri_chart():
     # Add 7-day moving average
     bri_smooth = analyzer.bri_data['BRI'].rolling(window=7, center=True).mean()
     fig.add_trace(go.Scatter(
-        x=analyzer.bri_data['date'],
-        y=bri_smooth,
+        x=analyzer.bri_data['date'].tolist(),
+        y=bri_smooth.tolist(),
         mode='lines',
         name='7-Day MA',
         line=dict(color='darkblue', width=3)
@@ -259,16 +262,16 @@ def api_correlation_chart():
     fig = go.Figure()
     
     fig.add_trace(go.Scatter(
-        x=merged['BRI'],
-        y=merged['Close_^VIX'],
+        x=merged['BRI'].tolist(),
+        y=merged['Close_^VIX'].tolist(),
         mode='markers',
         name='BRI vs VIX',
         marker=dict(
             size=8,
-            color=merged['date'],
+            color=list(range(len(merged))),
             colorscale='Viridis',
             showscale=True,
-            colorbar=dict(title="Date")
+            colorbar=dict(title="Time Index")
         )
     ))
     
@@ -279,8 +282,8 @@ def api_correlation_chart():
     y_pred = p(x_range)
     
     fig.add_trace(go.Scatter(
-        x=x_range,
-        y=y_pred,
+        x=x_range.tolist(),
+        y=y_pred.tolist(),
         mode='lines',
         name='Regression Line',
         line=dict(color='red', width=3)
@@ -336,7 +339,7 @@ def api_distribution_chart():
     
     # Add histogram
     fig.add_trace(go.Histogram(
-        x=analyzer.bri_data['BRI'],
+        x=analyzer.bri_data['BRI'].tolist(),
         nbinsx=30,
         name='BRI Distribution',
         marker_color='green',
