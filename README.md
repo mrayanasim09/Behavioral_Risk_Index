@@ -73,6 +73,39 @@ python app.py
 python bri_vix_comparison.py
 ```
 
+## 🔁 Reproducible runs
+
+Run the pipeline from saved raw CSVs (no network calls):
+
+```bash
+python process_from_raw.py --out output/processed_from_raw
+```
+
+Outputs: `bri_timeseries.csv`, `validation_results.json`, `summary.json`.
+
+Strict no-leakage train/test (Train 2020–2025, Test 2017–2018):
+
+```bash
+python train_test_from_raw.py
+```
+
+Outputs (under `output/train_test_from_raw/`): `bri_train.csv`, `bri_test.csv`, `weights.json`, `scalers.json`, `validation_train.json`, `validation_test.json`, `summary.json`.
+
+### Exact reproducibility (optional)
+
+Capture exact package versions:
+
+```bash
+pip freeze > requirements-lock.txt
+```
+
+Recreate environment:
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements-lock.txt
+```
+
 ## 📊 Real Data Analysis Results
 
 ### Model Performance (Unseen Data)
