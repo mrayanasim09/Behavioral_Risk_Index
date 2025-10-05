@@ -162,8 +162,8 @@ class UltimateBRIAnalyzer:
             'NASDAQ': nasdaq_values
         })
     
-    def run_monte_carlo_simulations(self, n_simulations=200000):
-        """Run 200k Monte Carlo simulations for BRI forecasting - VECTORIZED"""
+    def run_monte_carlo_simulations(self, n_simulations=10000000):
+        """Run 10 million Monte Carlo simulations for BRI forecasting - VECTORIZED"""
         logger.info(f"Running {n_simulations:,} Monte Carlo simulations...")
         start_time = time.time()
         
@@ -210,14 +210,14 @@ class UltimateBRIAnalyzer:
         duration = time.time() - start_time
         logger.info(f"Monte Carlo simulations completed in {duration:.2f}s ({n_simulations/duration:,.0f} sim/s)")
     
-    def run_backtesting(self, years=3):
-        """Run 3-year backtesting analysis with crisis detection"""
+    def run_backtesting(self, years=4):
+        """Run 4-year backtesting analysis with crisis detection"""
         logger.info(f"Running {years}-year backtesting analysis...")
         
         if self.historical_data is None:
             return
         
-        # Get last 3 years of data
+        # Get last 4 years of data
         cutoff_date = self.historical_data['date'].max() - pd.Timedelta(days=years*365)
         backtest_data = self.historical_data[self.historical_data['date'] >= cutoff_date].copy()
         
