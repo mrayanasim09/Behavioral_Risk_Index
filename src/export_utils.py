@@ -1,0 +1,495 @@
+"""
+Export Utilities for BRI Dashboard
+Implements PNG/PDF downloads, CSV exports, and automated reports
+"""
+
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+import base64
+import io
+import json
+from datetime import datetime, timedelta
+import os
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+import warnings
+warnings.filterwarnings('ignore')
+
+class ExportUtils:
+    """Export utilities for charts, data, and reports"""
+    
+    def __init__(self, bri_data, market_data=None):
+        self.bri_data = bri_data.copy()
+        self.market_data = market_data
+        self.export_dir = 'exports'
+        self.ensure_export_dir()
+        
+    def ensure_export_dir(self):
+        """Ensure export directory exists"""
+        if not os.path.exists(self.export_dir):
+            os.makedirs(self.export_dir)
+    
+    def export_chart_as_png(self, fig, filename, width=1200, height=800, dpi=300):
+        """
+        Export Plotly figure as PNG
+        
+        Args:
+            fig: Plotly figure object
+            filename (str): Output filename
+            width (int): Image width
+            height (int): Image height
+            dpi (int): Image DPI
+            
+        Returns:
+            str: Base64 encoded PNG data
+        """
+        try:
+            # Update figure layout for export
+            fig.update_layout(
+                width=width,
+                height=height,
+                font=dict(size=12),
+                title=dict(font=dict(size=16))
+            )
+            
+            # Export as PNG
+            img_bytes = pio.to_image(fig, format="png", width=width, height=height, scale=dpi/100)
+            
+            # Save to file
+            filepath = os.path.join(self.export_dir, f"{filename}.png")
+            with open(filepath, 'wb') as f:
+                f.write(img_bytes)
+            
+            # Return base64 encoded data
+            return base64.b64encode(img_bytes).decode('utf-8')
+            
+        except Exception as e:
+            print(f"Error exporting PNG: {e}")
+            return None
+    
+    def export_chart_as_pdf(self, fig, filename, width=1200, height=800):
+        """
+        Export Plotly figure as PDF
+        
+        Args:
+            fig: Plotly figure object
+            filename (str): Output filename
+            width (int): Image width
+            height (int): Image height
+            
+        Returns:
+            str: Base64 encoded PDF data
+        """
+        try:
+            # Update figure layout for export
+            fig.update_layout(
+                width=width,
+                height=height,
+                font=dict(size=12),
+                title=dict(font=dict(size=16))
+            )
+            
+            # Export as PDF
+            pdf_bytes = pio.to_image(fig, format="pdf", width=width, height=height)
+            
+            # Save to file
+            filepath = os.path.join(self.export_dir, f"{filename}.pdf")
+            with open(filepath, 'wb') as f:
+                f.write(pdf_bytes)
+            
+            # Return base64 encoded data
+            return base64.b64encode(pdf_bytes).decode('utf-8')
+            
+        except Exception as e:
+            print(f"Error exporting PDF: {e}")
+            return None
+    
+    def export_data_as_csv(self, data, filename, include_metadata=True):
+        """
+        Export data as CSV
+        
+        Args:
+            data: DataFrame or dict to export
+            filename (str): Output filename
+            include_metadata (bool): Include metadata in CSV
+            
+        Returns:
+            str: CSV data as string
+        """
+        try:
+            if isinstance(data, dict):
+                # Convert dict to DataFrame
+                df = pd.DataFrame(data)
+            else:
+                df = data.copy()
+            
+            # Add metadata if requested
+            if include_metadata:
+                metadata = {
+                    'export_timestamp': datetime.now().isoformat(),
+                    'data_points': len(df),
+                    'date_range': f"{df['date'].min()} to {df['date'].max()}" if 'date' in df.columns else 'N/A'
+                }
+                
+                # Add metadata as comments at the top
+                csv_content = f"# BRI Dashboard Export\n"
+                csv_content += f"# Export Timestamp: {metadata['export_timestamp']}\n"
+                csv_content += f"# Data Points: {metadata['data_points']}\n"
+                csv_content += f"# Date Range: {metadata['date_range']}\n"
+                csv_content += f"# Generated by Enhanced BRI Dashboard\n\n"
+                
+                # Add CSV data
+                csv_content += df.to_csv(index=False)
+            else:
+                csv_content = df.to_csv(index=False)
+            
+            # Save to file
+            filepath = os.path.join(self.export_dir, f"{filename}.csv")
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(csv_content)
+            
+            return csv_content
+            
+        except Exception as e:
+            print(f"Error exporting CSV: {e}")
+            return None
+    
+    def export_data_as_json(self, data, filename, include_metadata=True):
+        """
+        Export data as JSON
+        
+        Args:
+            data: Data to export
+            filename (str): Output filename
+            include_metadata (bool): Include metadata in JSON
+            
+        Returns:
+            str: JSON data as string
+        """
+        try:
+            export_data = {
+                'data': data,
+                'metadata': {
+                    'export_timestamp': datetime.now().isoformat(),
+                    'data_points': len(data) if hasattr(data, '__len__') else 1,
+                    'export_type': 'json',
+                    'generated_by': 'Enhanced BRI Dashboard'
+                }
+            } if include_metadata else data
+            
+            json_content = json.dumps(export_data, indent=2, default=str)
+            
+            # Save to file
+            filepath = os.path.join(self.export_dir, f"{filename}.json")
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(json_content)
+            
+            return json_content
+            
+        except Exception as e:
+            print(f"Error exporting JSON: {e}")
+            return None
+    
+    def create_automated_report(self, charts_data, analytics_summary, filename="bri_report"):
+        """
+        Create automated PDF report
+        
+        Args:
+            charts_data (dict): Dictionary of chart data
+            analytics_summary (dict): Analytics summary data
+            filename (str): Output filename
+            
+        Returns:
+            str: Base64 encoded PDF data
+        """
+        try:
+            # Create PDF document
+            filepath = os.path.join(self.export_dir, f"{filename}.pdf")
+            doc = SimpleDocTemplate(filepath, pagesize=A4)
+            styles = getSampleStyleSheet()
+            story = []
+            
+            # Title
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=24,
+                spaceAfter=30,
+                alignment=1  # Center alignment
+            )
+            story.append(Paragraph("Behavioral Risk Index (BRI) Report", title_style))
+            story.append(Spacer(1, 20))
+            
+            # Report metadata
+            metadata_style = ParagraphStyle(
+                'Metadata',
+                parent=styles['Normal'],
+                fontSize=10,
+                textColor=colors.grey
+            )
+            story.append(Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", metadata_style))
+            story.append(Paragraph(f"Data Points: {len(self.bri_data)}", metadata_style))
+            story.append(Paragraph(f"Date Range: {self.bri_data['date'].min()} to {self.bri_data['date'].max()}", metadata_style))
+            story.append(Spacer(1, 20))
+            
+            # Executive Summary
+            story.append(Paragraph("Executive Summary", styles['Heading2']))
+            summary_text = f"""
+            The Behavioral Risk Index (BRI) analysis reveals key insights into market behavioral patterns. 
+            Current BRI level: {analytics_summary.get('current_bri', 'N/A'):.1f} ({analytics_summary.get('risk_level', 'Unknown')} Risk).
+            The analysis covers {len(self.bri_data)} data points from {self.bri_data['date'].min()} to {self.bri_data['date'].max()}.
+            """
+            story.append(Paragraph(summary_text, styles['Normal']))
+            story.append(Spacer(1, 20))
+            
+            # Key Metrics Table
+            story.append(Paragraph("Key Metrics", styles['Heading2']))
+            metrics_data = [
+                ['Metric', 'Value'],
+                ['Current BRI', f"{analytics_summary.get('current_bri', 'N/A'):.1f}"],
+                ['Risk Level', analytics_summary.get('risk_level', 'Unknown')],
+                ['Mean BRI', f"{analytics_summary.get('mean_bri', 'N/A'):.1f}"],
+                ['Standard Deviation', f"{analytics_summary.get('std_bri', 'N/A'):.1f}"],
+                ['Minimum BRI', f"{analytics_summary.get('min_bri', 'N/A'):.1f}"],
+                ['Maximum BRI', f"{analytics_summary.get('max_bri', 'N/A'):.1f}"],
+                ['BRI-VIX Correlation', f"{analytics_summary.get('correlation', 'N/A'):.3f}"],
+                ['R-squared', f"{analytics_summary.get('r_squared', 'N/A'):.3f}"],
+                ['Data Points', str(analytics_summary.get('data_points', 'N/A'))]
+            ]
+            
+            metrics_table = Table(metrics_data)
+            metrics_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            story.append(metrics_table)
+            story.append(Spacer(1, 20))
+            
+            # Risk Analysis
+            story.append(Paragraph("Risk Analysis", styles['Heading2']))
+            risk_text = f"""
+            The BRI analysis identifies three distinct risk levels:
+            • Low Risk (0-30): Stable market conditions with low behavioral risk
+            • Moderate Risk (30-60): Normal market volatility with moderate risk
+            • High Risk (60-100): Elevated stress with high behavioral risk
+            
+            Current analysis shows {analytics_summary.get('risk_level', 'Unknown')} risk conditions.
+            """
+            story.append(Paragraph(risk_text, styles['Normal']))
+            story.append(Spacer(1, 20))
+            
+            # Methodology
+            story.append(Paragraph("Methodology", styles['Heading2']))
+            methodology_text = """
+            The Behavioral Risk Index (BRI) is calculated using five key behavioral indicators:
+            1. Sentiment Volatility (30%): Panic/fear proxy from social media
+            2. Media Herding (20%): Herding intensity in news coverage
+            3. News Tone (20%): Optimism/pessimism in financial news
+            4. Event Density (20%): Frequency of major market events
+            5. Polarity Skew (10%): Cognitive bias measure
+            
+            Data sources include GDELT (news events), Reddit/Twitter (social media), 
+            and Yahoo Finance (market data) with FinBERT sentiment analysis.
+            """
+            story.append(Paragraph(methodology_text, styles['Normal']))
+            story.append(Spacer(1, 20))
+            
+            # Disclaimer
+            story.append(Paragraph("Disclaimer", styles['Heading2']))
+            disclaimer_text = """
+            This report is for informational purposes only and should not be considered as 
+            investment advice. The BRI is a behavioral risk indicator and does not guarantee 
+            future market performance. Always consult with qualified financial professionals 
+            before making investment decisions.
+            """
+            story.append(Paragraph(disclaimer_text, styles['Normal']))
+            
+            # Build PDF
+            doc.build(story)
+            
+            # Read PDF and return base64
+            with open(filepath, 'rb') as f:
+                pdf_bytes = f.read()
+            
+            return base64.b64encode(pdf_bytes).decode('utf-8')
+            
+        except Exception as e:
+            print(f"Error creating automated report: {e}")
+            return None
+    
+    def create_daily_summary_report(self, date=None):
+        """
+        Create daily summary report
+        
+        Args:
+            date (str): Date for report (default: today)
+            
+        Returns:
+            dict: Daily summary data
+        """
+        if date is None:
+            date = datetime.now().strftime('%Y-%m-%d')
+        
+        try:
+            # Filter data for the specified date
+            daily_data = self.bri_data[self.bri_data['date'] == date]
+            
+            if daily_data.empty:
+                return None
+            
+            # Calculate daily metrics
+            daily_bri = daily_data['BRI'].iloc[0]
+            risk_level = 'Low' if daily_bri < 30 else 'Moderate' if daily_bri < 60 else 'High'
+            
+            # Calculate trends
+            recent_data = self.bri_data.tail(7)
+            trend = 'Rising' if recent_data['BRI'].iloc[-1] > recent_data['BRI'].iloc[0] else 'Falling'
+            
+            summary = {
+                'date': date,
+                'bri': daily_bri,
+                'risk_level': risk_level,
+                'trend': trend,
+                'components': {
+                    'sentiment_volatility': daily_data['sent_vol_score'].iloc[0] if 'sent_vol_score' in daily_data.columns else 0,
+                    'news_tone': daily_data['news_tone_score'].iloc[0] if 'news_tone_score' in daily_data.columns else 0,
+                    'media_herding': daily_data['herding_score'].iloc[0] if 'herding_score' in daily_data.columns else 0,
+                    'polarity_skew': daily_data['polarity_skew_score'].iloc[0] if 'polarity_skew_score' in daily_data.columns else 0,
+                    'event_density': daily_data['event_density_score'].iloc[0] if 'event_density_score' in daily_data.columns else 0
+                },
+                'generated_at': datetime.now().isoformat()
+            }
+            
+            return summary
+            
+        except Exception as e:
+            print(f"Error creating daily summary: {e}")
+            return None
+    
+    def create_weekly_summary_report(self, week_start=None):
+        """
+        Create weekly summary report
+        
+        Args:
+            week_start (str): Week start date (default: Monday of current week)
+            
+        Returns:
+            dict: Weekly summary data
+        """
+        if week_start is None:
+            today = datetime.now()
+            week_start = today - timedelta(days=today.weekday())
+            week_start = week_start.strftime('%Y-%m-%d')
+        
+        try:
+            # Filter data for the week
+            week_end = (datetime.strptime(week_start, '%Y-%m-%d') + timedelta(days=6)).strftime('%Y-%m-%d')
+            weekly_data = self.bri_data[
+                (self.bri_data['date'] >= week_start) & 
+                (self.bri_data['date'] <= week_end)
+            ]
+            
+            if weekly_data.empty:
+                return None
+            
+            # Calculate weekly metrics
+            weekly_bri_mean = weekly_data['BRI'].mean()
+            weekly_bri_std = weekly_data['BRI'].std()
+            weekly_bri_min = weekly_data['BRI'].min()
+            weekly_bri_max = weekly_data['BRI'].max()
+            
+            # Calculate volatility
+            weekly_volatility = weekly_bri_std / weekly_bri_mean * 100 if weekly_bri_mean > 0 else 0
+            
+            # Calculate trend
+            trend = 'Rising' if weekly_data['BRI'].iloc[-1] > weekly_data['BRI'].iloc[0] else 'Falling'
+            
+            summary = {
+                'week_start': week_start,
+                'week_end': week_end,
+                'bri_mean': weekly_bri_mean,
+                'bri_std': weekly_bri_std,
+                'bri_min': weekly_bri_min,
+                'bri_max': weekly_bri_max,
+                'volatility': weekly_volatility,
+                'trend': trend,
+                'data_points': len(weekly_data),
+                'components': {
+                    'sentiment_volatility': weekly_data['sent_vol_score'].mean() if 'sent_vol_score' in weekly_data.columns else 0,
+                    'news_tone': weekly_data['news_tone_score'].mean() if 'news_tone_score' in weekly_data.columns else 0,
+                    'media_herding': weekly_data['herding_score'].mean() if 'herding_score' in weekly_data.columns else 0,
+                    'polarity_skew': weekly_data['polarity_skew_score'].mean() if 'polarity_skew_score' in weekly_data.columns else 0,
+                    'event_density': weekly_data['event_density_score'].mean() if 'event_density_score' in weekly_data.columns else 0
+                },
+                'generated_at': datetime.now().isoformat()
+            }
+            
+            return summary
+            
+        except Exception as e:
+            print(f"Error creating weekly summary: {e}")
+            return None
+    
+    def export_all_formats(self, charts_data, analytics_summary):
+        """
+        Export all formats (PNG, PDF, CSV, JSON, Report)
+        
+        Args:
+            charts_data (dict): Dictionary of chart data
+            analytics_summary (dict): Analytics summary data
+            
+        Returns:
+            dict: Export results
+        """
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        results = {}
+        
+        try:
+            # Export charts as PNG
+            for chart_name, chart_fig in charts_data.items():
+                if hasattr(chart_fig, 'to_dict'):  # Plotly figure
+                    png_data = self.export_chart_as_png(chart_fig, f"{chart_name}_{timestamp}")
+                    results[f"{chart_name}_png"] = png_data
+            
+            # Export charts as PDF
+            for chart_name, chart_fig in charts_data.items():
+                if hasattr(chart_fig, 'to_dict'):  # Plotly figure
+                    pdf_data = self.export_chart_as_pdf(chart_fig, f"{chart_name}_{timestamp}")
+                    results[f"{chart_name}_pdf"] = pdf_data
+            
+            # Export data as CSV
+            csv_data = self.export_data_as_csv(self.bri_data, f"bri_data_{timestamp}")
+            results['bri_data_csv'] = csv_data
+            
+            # Export data as JSON
+            json_data = self.export_data_as_json(self.bri_data.to_dict('records'), f"bri_data_{timestamp}")
+            results['bri_data_json'] = json_data
+            
+            # Create automated report
+            report_data = self.create_automated_report(charts_data, analytics_summary, f"bri_report_{timestamp}")
+            results['automated_report'] = report_data
+            
+            # Create daily summary
+            daily_summary = self.create_daily_summary_report()
+            results['daily_summary'] = daily_summary
+            
+            # Create weekly summary
+            weekly_summary = self.create_weekly_summary_report()
+            results['weekly_summary'] = weekly_summary
+            
+            return results
+            
+        except Exception as e:
+            print(f"Error in export_all_formats: {e}")
+            return {'error': str(e)}
