@@ -935,6 +935,117 @@ def api_forecast_chart():
     
     return jsonify(fig.to_dict())
 
+@app.route('/api/crisis_timeline_chart')
+def api_crisis_timeline_chart():
+    """API endpoint for historical crisis timeline with BRI spikes"""
+    if analyzer.historical_data is None:
+        return jsonify({'error': 'No historical data available'})
+    
+    # Get full historical data
+    data = analyzer.historical_data.copy()
+    
+    # Define crisis periods with extended windows to show pre-crisis spikes
+    crisis_periods = {
+        '2008 Financial Crisis': {
+            'start': '2008-06-01',  # 3 months before Lehman
+            'end': '2009-03-31',
+            'peak_date': '2008-09-15',  # Lehman Brothers collapse
+            'color': '#E53E3E'
+        },
+        '2020 COVID-19': {
+            'start': '2020-01-01',  # Start of 2020
+            'end': '2020-04-30',
+            'peak_date': '2020-03-23',  # Market bottom
+            'color': '#F59E0B'
+        },
+        '2022 Ukraine War': {
+            'start': '2022-01-01',
+            'end': '2022-04-30',
+            'peak_date': '2022-02-24',  # Invasion date
+            'color': '#8B5CF6'
+        }
+    }
+    
+    fig = go.Figure()
+    
+    # Add full BRI timeline
+    fig.add_trace(go.Scatter(
+        x=data['date'].tolist(),
+        y=data['BRI'].tolist(),
+        mode='lines',
+        name='BRI Timeline',
+        line=dict(color='#3182CE', width=2),
+        hovertemplate='<b>%{x}</b><br>BRI: %{y:.2f}<extra></extra>'
+    ))
+    
+    # Add crisis period highlights
+    for crisis_name, period in crisis_periods.items():
+        # Filter data for crisis period
+        crisis_data = data[
+            (data['date'] >= period['start']) & 
+            (data['date'] <= period['end'])
+        ]
+        
+        if len(crisis_data) > 0:
+            # Add crisis period line
+            fig.add_trace(go.Scatter(
+                x=crisis_data['date'].tolist(),
+                y=crisis_data['BRI'].tolist(),
+                mode='lines',
+                name=f'{crisis_name} BRI',
+                line=dict(color=period['color'], width=4),
+                hovertemplate=f'<b>{crisis_name}</b><br>%{{x}}<br>BRI: %{{y:.2f}}<extra></extra>'
+            ))
+            
+            # Add peak marker
+            peak_data = crisis_data[crisis_data['date'] == period['peak_date']]
+            if len(peak_data) > 0:
+                fig.add_trace(go.Scatter(
+                    x=[peak_data['date'].iloc[0]],
+                    y=[peak_data['BRI'].iloc[0]],
+                    mode='markers',
+                    name=f'{crisis_name} Peak',
+                    marker=dict(
+                        size=15,
+                        color=period['color'],
+                        symbol='star',
+                        line=dict(width=2, color='white')
+                    ),
+                    hovertemplate=f'<b>{crisis_name} Peak</b><br>%{{x}}<br>BRI: %{{y:.2f}}<extra></extra>'
+                ))
+    
+    # Add risk level thresholds
+    fig.add_hline(y=75, line_dash="dash", line_color="#E53E3E", 
+                  annotation_text="High Risk (75)", annotation_position="top right")
+    fig.add_hline(y=50, line_dash="dash", line_color="#F59E0B", 
+                  annotation_text="Moderate Risk (50)", annotation_position="top right")
+    fig.add_hline(y=25, line_dash="dash", line_color="#38A169", 
+                  annotation_text="Low Risk (25)", annotation_position="top right")
+    
+    theme = get_chart_theme()
+    fig.update_layout(
+        title=dict(
+            text='Historical BRI Crisis Timeline - Early Warning System',
+            font=dict(color=theme['text_color'], size=20, family='Inter')
+        ),
+        xaxis_title='Date',
+        yaxis_title='BRI Value',
+        height=600,
+        plot_bgcolor=theme['bg_color'],
+        paper_bgcolor=theme['paper_bg'],
+        font=dict(color=theme['text_color'], family='Inter'),
+        hovermode='x unified',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
+    )
+    
+    return jsonify(fig.to_dict())
+
 @app.route('/api/crisis_analysis')
 def api_crisis_analysis():
     """API endpoint for historical crisis analysis"""

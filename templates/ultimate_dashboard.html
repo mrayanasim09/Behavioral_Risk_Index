@@ -445,6 +445,16 @@
             </div>
         </div>
 
+        <!-- Crisis Timeline Chart -->
+        <div class="card chart-container full-width">
+            <div class="chart-title">Historical BRI Crisis Timeline - Early Warning System</div>
+            <div class="chart-wrapper large" id="crisisTimelineChart">
+                <div class="loading-overlay" id="crisisTimelineLoading">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Crisis Analysis -->
         <div class="card chart-container full-width">
             <div class="chart-title">Historical Crisis Analysis</div>
@@ -662,6 +672,7 @@
                 loadBRIComparisonChart(),
                 loadMonteCarloChart(),
                 loadForecastChart(),
+                loadCrisisTimelineChart(),
                 loadResearchMetrics(),
                 loadCrisisAnalysis()
             ]);
@@ -748,6 +759,35 @@
                 
             } catch (error) {
                 console.error('Error loading forecast chart:', error);
+                loadingEl.innerHTML = '<div class="text-danger">Error loading chart</div>';
+            }
+        }
+        
+        // Load crisis timeline chart
+        async function loadCrisisTimelineChart() {
+            const loadingEl = document.getElementById('crisisTimelineLoading');
+            loadingEl.style.display = 'flex';
+            
+            try {
+                const response = await fetch('/api/crisis_timeline_chart');
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Hide loading immediately before rendering
+                loadingEl.style.display = 'none';
+                
+                // Render chart
+                Plotly.newPlot('crisisTimelineChart', data.data, data.layout, {
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
+                });
+                
+            } catch (error) {
+                console.error('Error loading crisis timeline chart:', error);
                 loadingEl.innerHTML = '<div class="text-danger">Error loading chart</div>';
             }
         }
