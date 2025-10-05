@@ -47,7 +47,7 @@ cyclopts==3.22.5
 cymem==2.0.11
 Cython==3.1.2
 dateparser==1.2.2
-deepdiff==8.5.0
+deepdiff==8.6.1
 defusedxml==0.8.0rc2
 diffusers==0.35.1
 distro==1.9.0
