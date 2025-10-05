@@ -306,7 +306,7 @@ def api_correlation_chart():
             color=list(range(len(merged))),
             colorscale=[[0, '#2ECC71'], [0.5, '#F1C40F'], [1, '#E74C3C']],
             showscale=True,
-            colorbar=dict(title="Time Index", titlefont=dict(color='#2C3E50', family='Inter'))
+            colorbar=dict(title="Time Index", tickfont=dict(color='#2C3E50', family='Inter'))
         )
     ))
     
