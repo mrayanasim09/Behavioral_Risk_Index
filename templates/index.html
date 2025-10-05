@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Behavioral Risk Index (BRI) Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .risk-low { color: #28a745; }
+        .risk-medium { color: #ffc107; }
+        .risk-high { color: #fd7e14; }
+        .risk-extreme { color: #dc3545; }
+        
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .metric-label {
+            font-size: 1.1rem;
+            color: #6c757d;
+        }
+        
+        .chart-container {
+            height: 500px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="mb-0">
+                            <i class="fas fa-chart-line"></i>
+                            Behavioral Risk Index (BRI) Dashboard
+                        </h1>
+                        <p class="mb-0">Real-time monitoring of market behavioral risk patterns</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row" id="summary-cards">
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="current-bri">--</div>
+                    <div class="metric-label">Current BRI</div>
+                    <div class="mt-2">
+                        <span class="badge" id="risk-level-badge">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="mean-bri">--</div>
+                    <div class="metric-label">Mean BRI</div>
+                    <div class="mt-2">
+                        <small class="text-muted">Historical Average</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="correlation">--</div>
+                    <div class="metric-label">BRI-VIX Correlation</div>
+                    <div class="mt-2">
+                        <small class="text-muted">Market Relationship</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value" id="trend">--</div>
+                    <div class="metric-label">Trend</div>
+                    <div class="mt-2">
+                        <small class="text-muted">30-Day Direction</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-area"></i>
+                            BRI Time Series
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="bri-chart" class="chart-container">
+                            <div class="loading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3">Loading BRI time series...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-pie"></i>
+                            Feature Importance
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="feature-chart" class="chart-container">
+                            <div class="loading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3">Loading features...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-scatter"></i>
+                            BRI vs VIX Correlation
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="correlation-chart" class="chart-container">
+                            <div class="loading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3">Loading correlation...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar"></i>
+                            BRI Distribution
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="distribution-chart" class="chart-container">
+                            <div class="loading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3">Loading distribution...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <p class="mb-0">
+                            <i class="fas fa-info-circle"></i>
+                            Last Updated: <span id="last-updated">Loading...</span>
+                        </p>
+                        <p class="mb-0 text-muted">
+                            Behavioral Risk Index - A comprehensive measure of market behavioral risk patterns
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let updateInterval;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            // Auto-refresh every 5 minutes
+            updateInterval = setInterval(loadDashboard, 300000);
+        });
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Load summary data
+                const summaryResponse = await fetch('/api/summary');
+                const summaryData = await summaryResponse.json();
+                updateSummaryCards(summaryData);
+
+                // Load charts
+                await loadBRIChart();
+                await loadCorrelationChart();
+                await loadFeatureChart();
+                await loadDistributionChart();
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        // Update summary cards
+        function updateSummaryCards(data) {
+            document.getElementById('current-bri').textContent = data.current_bri ? data.current_bri.toFixed(1) : '--';
+            document.getElementById('mean-bri').textContent = data.mean_bri ? data.mean_bri.toFixed(1) : '--';
+            document.getElementById('correlation').textContent = data.correlation ? data.correlation.toFixed(3) : '--';
+            document.getElementById('trend').textContent = data.trend || '--';
+            document.getElementById('last-updated').textContent = data.last_updated || 'Unknown';
+
+            // Update risk level badge
+            const riskLevel = data.risk_level || 'Unknown';
+            const badge = document.getElementById('risk-level-badge');
+            badge.textContent = riskLevel;
+            badge.className = 'badge ' + getRiskClass(riskLevel);
+        }
+
+        // Get risk level CSS class
+        function getRiskClass(riskLevel) {
+            switch(riskLevel.toLowerCase()) {
+                case 'low': return 'bg-success';
+                case 'medium': return 'bg-warning';
+                case 'high': return 'bg-danger';
+                case 'extreme': return 'bg-dark';
+                default: return 'bg-secondary';
+            }
+        }
+
+        // Load BRI chart
+        async function loadBRIChart() {
+            try {
+                const response = await fetch('/api/bri_chart');
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                Plotly.newPlot('bri-chart', data.data, data.layout, {responsive: true});
+            } catch (error) {
+                console.error('Error loading BRI chart:', error);
+                document.getElementById('bri-chart').innerHTML = '<div class="alert alert-danger">Failed to load BRI chart</div>';
+            }
+        }
+
+        // Load correlation chart
+        async function loadCorrelationChart() {
+            try {
+                const response = await fetch('/api/correlation_chart');
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                Plotly.newPlot('correlation-chart', data.data, data.layout, {responsive: true});
+            } catch (error) {
+                console.error('Error loading correlation chart:', error);
+                document.getElementById('correlation-chart').innerHTML = '<div class="alert alert-danger">Failed to load correlation chart</div>';
+            }
+        }
+
+        // Load feature chart
+        async function loadFeatureChart() {
+            try {
+                const response = await fetch('/api/feature_chart');
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                Plotly.newPlot('feature-chart', data.data, data.layout, {responsive: true});
+            } catch (error) {
+                console.error('Error loading feature chart:', error);
+                document.getElementById('feature-chart').innerHTML = '<div class="alert alert-danger">Failed to load feature chart</div>';
+            }
+        }
+
+        // Load distribution chart
+        async function loadDistributionChart() {
+            try {
+                const response = await fetch('/api/distribution_chart');
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                Plotly.newPlot('distribution-chart', data.data, data.layout, {responsive: true});
+            } catch (error) {
+                console.error('Error loading distribution chart:', error);
+                document.getElementById('distribution-chart').innerHTML = '<div class="alert alert-danger">Failed to load distribution chart</div>';
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.insertBefore(alertDiv, document.body.firstChild);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (typeof Plotly !== 'undefined') {
+                Plotly.Plots.resize('bri-chart');
+                Plotly.Plots.resize('correlation-chart');
+                Plotly.Plots.resize('feature-chart');
+                Plotly.Plots.resize('distribution-chart');
+            }
+        });
+    </script>
+</body>
+</html>

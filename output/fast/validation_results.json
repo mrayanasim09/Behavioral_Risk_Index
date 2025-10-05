@@ -1,0 +1,15 @@
+{
+  "bri_vix_correlation": 0.8722796182242013,
+  "bri_stats": {
+    "mean": 34.462192094046124,
+    "std": 11.097731325835547,
+    "min": 7.22074118597989,
+    "max": 70.91885853198856,
+    "percentile_90": 49.0557684683539,
+    "percentile_95": 53.928662325529686
+  },
+  "high_risk_days": 219,
+  "extreme_risk_days": 55,
+  "high_risk_threshold": 43.83741903578864,
+  "extreme_risk_threshold": 53.928662325529686
+}
